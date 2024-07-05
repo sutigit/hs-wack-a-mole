@@ -1,8 +1,15 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useSpring, animated, useSpringRef } from '@react-spring/web'
 
-export default function Score({number}: {number: number}) {
+// Context
+import {GameContext} from '../contexts/GameContext';
 
+export default function Score() {
+
+  // GameContext
+  const { scoreNumber } = useContext(GameContext);
+
+  // Animation
   const scoreSpringApi = useSpringRef();
   const scoreSpring = useSpring({
     ref: scoreSpringApi,
@@ -22,11 +29,11 @@ export default function Score({number}: {number: number}) {
   useEffect(() => {
     scoreSpringApi.start();
     
-  }, [number]);
+  }, [scoreNumber]);
 
   return (
     <div style={Container}>
-        <animated.div style={{...ScoreNumber, ...scoreSpring}}>{number}</animated.div>
+        <animated.div style={{...ScoreNumber, ...scoreSpring}}>{scoreNumber}</animated.div>
     </div>
   )
 }

@@ -1,9 +1,16 @@
 import Head from "next/head";
+import { useContext, useEffect } from "react";
 
 import PlayArea from "./components/PlayArea";
+import Score from "./components/Score";
+import StartScreen from "./components/StartScreen";
+
+// Context
+import { GameProvider } from "./contexts/GameContext";
 
 export default function Home() {
-  
+
+
   return (
     <>
       <Head>
@@ -13,9 +20,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main style={MainContainer}>  
-        <div style={PlayAreaContainer}>
-          <PlayArea />
-        </div>
+        <GameProvider>
+          <section style={PlayAreaStyle}>
+            <StartScreen />
+            <Score />
+            <PlayArea />
+          </section>
+        </GameProvider>
       </main>
     </>
   );
@@ -30,7 +41,7 @@ const MainContainer: React.CSSProperties = {
   height: "100vh",
 };
 
-const PlayAreaContainer: React.CSSProperties = {
+const PlayAreaStyle: React.CSSProperties = {
   paddingTop: "3vh",
   paddingBottom: "5px",
   width: "100%",

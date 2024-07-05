@@ -1,12 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useContext } from 'react'
 import { useSpring, animated, useSpringRef } from '@react-spring/web'
+
+// Context
+import { GameContext } from '../contexts/GameContext'
 
 import Hammer from './Hammer'
 
-export default function Mole({isActive, type, handleMoleHit}: {isActive: boolean, type: string, handleMoleHit: (newPoints: number) => void}) {
+export default function Mole() {
+    // Context states
+    const { 
+        moleLCT,
+        moleSWI,
+        scoreNumber,
+        setScoreNumber,
+    } = useContext(GameContext)
 
-    const [canHit, setCanHit] = useState<boolean>(false);
-    const [scoreValue, setScoreValue] = useState<number>(10);
+    // States
+    const [canHit, setCanHit] = useState<boolean>(true);
 
     // Refs
     const moleRef = useRef<HTMLDivElement>(null);
@@ -15,101 +25,122 @@ export default function Mole({isActive, type, handleMoleHit}: {isActive: boolean
 
     // Mole animation
     const moleSpringApi = useSpringRef();
+    // set initial mole properties
     const moleSpring = useSpring({
         ref: moleSpringApi,
         from: MolePosDown,
-        config: {
-            duration: 200,
-        },
     });
 
     // Hammer animation
     const hammerSpringApi = useSpringRef();
-    const hammerSpring = useSpring({ref: hammerSpringApi});
-
-    // Type styling
-    const typeSpringApi = useSpringRef();
-    const typeSpring = useSpring({
-        ref: typeSpringApi,
-        from: MoleBasic,
+    // set initial hammer properties
+    const hammerSpring = useSpring({
+        ref: hammerSpringApi,
+        from: { transform: `rotate(-40deg)`, opacity: 0},
     });
 
 
-    // Mole type styling
-    let MoleType: React.CSSProperties;
+    // TODO: migrate to global settings
+    const moleSpringRatio = 0.12;
+    const moleRestRatio = 0.7;
 
-    if (type === 'basic') {
-        MoleType = MoleBasic;
-    } else if (type === 'gold') {
-        MoleType = MoleGold;
+
+    // Animation Functions
+    const moleRise = () => {
+        moleSpringApi.start({
+            to: MolePosUp,
+            config: {
+                duration: Math.floor(moleLCT.current * moleSpringRatio),
+            },
+            onRest: () => moleRemove(),
+        });
     }
 
 
+    const moleRemove = () => {
+        moleSpringApi.start({
+            to: MolePosDown,
+            delay: Math.floor(moleLCT.current * moleRestRatio),
+            config: {
+                duration: Math.floor(moleLCT.current * moleSpringRatio),
+            },
+            onRest: () => {
+                setCanHit(false);
+            },
+        });
+    }
+
+    const moleRemoveOnHit = () => {
+        moleSpringApi.start({
+            to: MolePosDown,
+            delay: 100,
+            config: {
+                duration: Math.floor(moleLCT.current * moleSpringRatio),
+            },
+        });
+    }
+
+    const animateHammer = () => {
+        // Animate hammer ---------
+        const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
+        const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
+        const calcPos = molePadBottom - moleTop - 20;
+
+        hammerSpringApi.start({
+            from: { transform: `rotate(-40deg)`, opacity: 0, bottom: calcPos},
+            to: [
+                { transform: `rotate(-90deg)`, opacity: 1},
+                { transform: `rotate(-80deg)`, opacity: 1 },
+                { transform: `rotate(-80deg)`, opacity: 0 },
+            ],
+            config: {
+                duration: 100,
+            },
+            reset: true,
+        });
+    }
+
     useEffect(() => {
-        if (isActive) {
-            setCanHit(true);
+        // Check if refs are not null
+        if (!moleRef.current || !molePadRef.current || !hammerRef.current) return;
 
-            // set score value
-            if (type === 'gold') {
-                setScoreValue(30);
-            } else {
-                setScoreValue(10); // default
-            }
+        console.log('Mole component mounted', moleLCT.current, moleSWI.current);
 
-            moleSpringApi.start({
-                to: MolePosUp,
-            });
+        // on component mount
+        const randomSpawnTimeWindow = moleSWI.current - moleLCT.current;
+        const randomSpawnTime = Math.floor(Math.random() * randomSpawnTimeWindow);
 
-            typeSpringApi.start({
-                to: MoleType,
-                immediate: true,
-                reset: true,
-            });
-        } else {
-            moleSpringApi.start({
-                to: MolePosDown,
-                delay: 150,
-                onRest: () => {
-                    setCanHit(false);
-                    setScoreValue(10); // default
-                }
-            });
+        const tmHandle = setTimeout(() => {
+            moleRise();
+        }, randomSpawnTime);
+
+        return () => {
+            clearTimeout(tmHandle);
         }
-    }, [isActive]);
-
-
+    }, []);
 
     const handleMouseDown = () => {
         if (canHit) {
-            // Handle mole hit ---------
-            handleMoleHit(scoreValue);
+            // Hit the mole
+            animateHammer();
+            moleRemoveOnHit();
             setCanHit(false);
-
-
-            // Animate hammer ---------
-            const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
-            const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
-            const calcPos = molePadBottom - moleTop - 20;
-            hammerSpringApi.start({
-                from: { transform: `rotate(-40deg)`, opacity: 0, bottom: calcPos},
-                to: [
-                    { transform: `rotate(-90deg)`, opacity: 1},
-                    { transform: `rotate(-80deg)`, opacity: 1 },
-                    { transform: `rotate(-80deg)`, opacity: 0 },
-                ],
-                config: {
-                    duration: 100,
-                },
-                reset: true,
-            });
+            
+            // Add score
+            setScoreNumber(scoreNumber + 10);
         }
+
     }
 
     return (
         <div style={Container}>
-            <div ref={molePadRef} style={MolePad} onMouseDown={handleMouseDown}>
-                <animated.div ref={moleRef} style={{...MoleCommonStyle, ...moleSpring, ...typeSpring}}></animated.div>
+            
+            {/* Mole */}
+            <div ref={molePadRef} style={MoleContainer} onMouseDown={handleMouseDown}>
+                <animated.div ref={moleRef} style={{...MoleCommonStyle, ...moleSpring, ...MoleBasic}}></animated.div>
             </div>
+            
+            {/* Hammer */}
             <animated.div ref={hammerRef} style={{...HammerWrapper, ...hammerSpring}}>
                 <Hammer />
             </animated.div>
@@ -136,14 +167,13 @@ const HammerWrapper: React.CSSProperties = {
     opacity: 0,
 }
 
-const MolePad: React.CSSProperties = {
+const MoleContainer: React.CSSProperties = {
     width: '100%',
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
     overflow: 'hidden',
-    cursor: 'pointer',
 }
 
 const MoleCommonStyle: React.CSSProperties = {
