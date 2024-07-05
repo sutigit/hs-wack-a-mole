@@ -1,25 +1,31 @@
 import React, { createContext, useState, ReactNode, useRef } from "react";
 
 interface GameContextProps {
-    gameStarted: boolean;
-    setGameStarted: React.Dispatch<React.SetStateAction<boolean>>;
+    gameState: GameStates;
+    setGameState: React.Dispatch<React.SetStateAction<GameStates>>;
+
     scoreNumber: number;
     setScoreNumber: React.Dispatch<React.SetStateAction<number>>;
+
     moleSWI: any;
-    // setMoleSWI: React.Dispatch<React.SetStateAction<number>>;
     moleLCT: any;
-    // setMoleLCT: React.Dispatch<React.SetStateAction<number>>;
+}
+
+enum GameStates {
+    READY = "READY",
+    STARTED = "STARTED",
+    OVER = "OVER",
 }
 
 const defaultValue = {
-    gameStarted: false,
-    setGameStarted: () => {},
+    gameState: GameStates.READY,
+    setGameState: () => {},
+
     scoreNumber: 0,
     setScoreNumber: () => {},
-    moleSWI: 4000,
-    // setMoleSWI: () => {},
-    moleLCT: 3500,
-    // setMoleLCT: () => {},
+
+    moleSWI: 3000,
+    moleLCT: 2500,
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
@@ -29,31 +35,30 @@ interface GameProviderProps {
 }
 
 const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
+
+
     
-    const [gameStarted, setGameStarted] = useState(defaultValue.gameStarted);
+    const [gameState, setGameState] = useState(defaultValue.gameState);
+
     const [scoreNumber, setScoreNumber] = useState(defaultValue.scoreNumber);
-    // const [moleSWI, setMoleSWI] = useState(defaultValue.moleSWI);
-    // const [moleLCT, setMoleLCT] = useState(defaultValue.moleLCT);
+
     const moleSWI = useRef(defaultValue.moleSWI);
     const moleLCT = useRef(defaultValue.moleLCT);
 
     const value = {
         // game states
-        gameStarted,
-        setGameStarted,
+        gameState,
+        setGameState,
 
         // game score
         scoreNumber,
         setScoreNumber,
         
         // mole spawn window interval time
-        moleSWI: moleSWI,
-        // setMoleSWI,
+        moleSWI,
 
         // mole life cycle time
         moleLCT,
-        // setMoleLCT
-
     }
 
     return (
@@ -63,4 +68,4 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     );
 };
 
-export { GameProvider, GameContext };
+export { GameProvider, GameContext,  GameStates};

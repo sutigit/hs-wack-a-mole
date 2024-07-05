@@ -4,6 +4,7 @@ import { useContext, useEffect } from "react";
 import PlayArea from "./components/PlayArea";
 import Score from "./components/Score";
 import StartScreen from "./components/StartScreen";
+import GameOverScreen from "./components/GameOverScreen";
 
 // Context
 import { GameProvider } from "./contexts/GameContext";
@@ -23,6 +24,7 @@ export default function Home() {
         <GameProvider>
           <section style={PlayAreaStyle}>
             <StartScreen />
+            <GameOverScreen />
             <Score />
             <PlayArea />
           </section>

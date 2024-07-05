@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react'
 import { useSpring, animated, useSpringRef } from '@react-spring/web'
 
 // Context
-import { GameContext } from '../contexts/GameContext'
+import { GameContext, GameStates } from '../contexts/GameContext'
 
 import Hammer from './Hammer'
 
@@ -13,10 +13,13 @@ export default function Mole() {
         moleSWI,
         scoreNumber,
         setScoreNumber,
+        setGameState,
     } = useContext(GameContext)
 
     // States
     const [canHit, setCanHit] = useState<boolean>(true);
+    const [isHit, setIsHit] = useState<boolean>(false);
+    const [moleType, setMoleType] = useState<string>('basic');
 
     // Refs
     const moleRef = useRef<HTMLDivElement>(null);
@@ -29,6 +32,14 @@ export default function Mole() {
     const moleSpring = useSpring({
         ref: moleSpringApi,
         from: MolePosDown,
+    });
+
+    // Mole type animation
+    const moleTypeApi = useSpringRef();
+    // set initial mole properties
+    const moleTypeSpring: any = useSpring({
+        ref: moleTypeApi,
+        from: MoleBasic,
     });
 
     // Hammer animation
@@ -66,8 +77,13 @@ export default function Mole() {
             },
             onRest: () => {
                 setCanHit(false);
+
+                if (!isHit) {
+                    // Game Over
+                    setGameState(GameStates.OVER);
+                }
             },
-        });
+        })
     }
 
     const moleRemoveOnHit = () => {
@@ -79,6 +95,7 @@ export default function Mole() {
             },
         });
     }
+
 
     const animateHammer = () => {
         // Animate hammer ---------
@@ -100,11 +117,21 @@ export default function Mole() {
         });
     }
 
+
     useEffect(() => {
         // Check if refs are not null
         if (!moleRef.current || !molePadRef.current || !hammerRef.current) return;
 
-        console.log('Mole component mounted', moleLCT.current, moleSWI.current);
+        // random mole type
+        // TODO: migrate to global settings
+        const probability = 0.2;
+        if (Math.random() <= probability) {
+            setMoleType('gold');
+            moleTypeApi.start({ 
+                to: MoleGold,
+                immediate: true,
+            });
+        }
 
         // on component mount
         const randomSpawnTimeWindow = moleSWI.current - moleLCT.current;
@@ -114,6 +141,7 @@ export default function Mole() {
             moleRise();
         }, randomSpawnTime);
 
+
         return () => {
             clearTimeout(tmHandle);
         }
@@ -122,12 +150,17 @@ export default function Mole() {
     const handleMouseDown = () => {
         if (canHit) {
             // Hit the mole
+            moleSpringApi.stop();
+            
+            setIsHit(true);
+            setCanHit(false);
+
             animateHammer();
             moleRemoveOnHit();
-            setCanHit(false);
             
             // Add score
-            setScoreNumber(scoreNumber + 10);
+            const score = moleType === 'gold' ? 30 : 10;
+            setScoreNumber(scoreNumber + score);
         }
 
     }
@@ -137,7 +170,7 @@ export default function Mole() {
             
             {/* Mole */}
             <div ref={molePadRef} style={MoleContainer} onMouseDown={handleMouseDown}>
-                <animated.div ref={moleRef} style={{...MoleCommonStyle, ...moleSpring, ...MoleBasic}}></animated.div>
+                <animated.div ref={moleRef} style={{...MoleCommonStyle, ...moleSpring, ...moleTypeSpring}}></animated.div>
             </div>
             
             {/* Hammer */}

@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react'
 
-import {GameContext} from '../contexts/GameContext'
+import {GameContext, GameStates} from '../contexts/GameContext'
 
 import MoleHolePad from './MoleHolePad'
 
@@ -11,37 +11,49 @@ export default function PlayArea() {
   const [luckyNumberMole, setLuckyNumberMole] = useState<number | null>(null)
   
   const {
-    gameStarted,
     moleSWI,
     moleLCT,
+    gameState,
+    setScoreNumber,
   } = useContext(GameContext)
 
   useEffect(() => {
-    if (gameStarted) {
-      nextIntervalSetup()
+    if (gameState === GameStates.STARTED) {
+      // Reset initial values
+      moleSWI.current = 3000
+      moleLCT.current = 2500
+      setScoreNumber(0)
 
-      return () => {
-        if (timeOutHandle) {
-          clearTimeout(timeOutHandle)
-        }
+      // 1000ms delay to start spawning moles
+      nextIntervalSetup(1000)
+    }
+
+    else if (gameState === GameStates.OVER) {      
+      if (timeOutHandle) {
+        clearTimeout(timeOutHandle)
       }
     }
-  }, [gameStarted])
 
-  const nextIntervalSetup = () => {
+    return () => {
+      if (timeOutHandle) {
+        clearTimeout(timeOutHandle)
+      }
+    }
+  }, [gameState])
+
+  const nextIntervalSetup = (time: number) => {
     const tmHandle = setTimeout(() => {
 
       // TODO: migrate to global settings
-      if (moleSWI.current > 1500) {
+      if (moleSWI.current > 1200) {
         // Mole Spawn Window Interval
         moleSWI.current -= 100
       }
 
-      if (moleLCT.current > 1000) {
+      if (moleLCT.current > 600) {
         // Mole Life Cycle Time
         moleLCT.current -= 100
       }
-
 
       // generate random number 0-8
       const randint = Math.floor(Math.random() * 9)
@@ -50,8 +62,8 @@ export default function PlayArea() {
       setLuckyNumberMole(randint)
 
       
-      nextIntervalSetup() 
-    }, moleSWI.current)
+      nextIntervalSetup(moleSWI.current) 
+    }, time)
 
     setTimeOutHandle(tmHandle)
   }
