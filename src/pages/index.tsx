@@ -1,13 +1,12 @@
 import Head from "next/head";
-import { useContext, useEffect } from "react";
 
-import PlayArea from "./components/PlayArea";
-import Score from "./components/Score";
-import StartScreen from "./components/StartScreen";
-import GameOverScreen from "./components/GameOverScreen";
+import PlayArea from "../components/PlayArea";
+import Score from "../components/Score";
+import StartScreen from "../components/StartScreen";
+import GameOverScreen from "../components/GameOverScreen";
 
 // Context
-import { GameProvider } from "./contexts/GameContext";
+import { GameProvider } from "../contexts/GameContext";
 
 export default function Home() {
 
