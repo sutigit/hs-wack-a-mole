@@ -46,7 +46,6 @@ const Container: React.CSSProperties = {
 }
 
 const ScoreNumber: React.CSSProperties = {
-  fontFamily: 'Arial, sans-serif',
   fontWeight: 'bold',
   fontSize: '4rem',
   padding: '50px',

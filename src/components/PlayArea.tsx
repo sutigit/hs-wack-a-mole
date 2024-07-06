@@ -52,9 +52,9 @@ export default function PlayArea() {
         moleSWI.current -= 100
       }
 
-      if (moleLCT.current > 600) {
+      if (moleLCT.current > 1000) {
         // Mole Life Cycle Time
-        moleLCT.current -= 100
+        moleLCT.current -= 90
       }
 
       // generate random number 0-8

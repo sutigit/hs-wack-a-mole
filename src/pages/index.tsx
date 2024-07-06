@@ -34,6 +34,7 @@ export default function Home() {
 }
 
 const MainContainer: React.CSSProperties = {
+  fontFamily: 'Arial, sans-serif',
   flex: 1,
   display: "flex",
   justifyContent: "center",
