@@ -26,6 +26,7 @@ export default function PlayArea() {
 
       // 1000ms delay to start spawning moles
       nextIntervalSetup(1000)
+
     }
 
     else if (gameState === GameStates.OVER) {      
@@ -40,6 +41,7 @@ export default function PlayArea() {
       }
     }
   }, [gameState])
+
 
   const nextIntervalSetup = (time: number) => {
     const tmHandle = setTimeout(() => {

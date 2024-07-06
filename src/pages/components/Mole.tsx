@@ -5,6 +5,7 @@ import { useSpring, animated, useSpringRef } from '@react-spring/web'
 import { GameContext, GameStates } from '../contexts/GameContext'
 
 import Hammer from './Hammer'
+import HitFeedback from './HitFeedBack'
 
 export default function Mole() {
     // Context states
@@ -16,15 +17,16 @@ export default function Mole() {
         setGameState,
     } = useContext(GameContext)
 
-    // States
-    const [canHit, setCanHit] = useState<boolean>(true);
-    const [isHit, setIsHit] = useState<boolean>(false);
-    const [moleType, setMoleType] = useState<string>('basic');
 
     // Refs
     const moleRef = useRef<HTMLDivElement>(null);
     const molePadRef = useRef<HTMLDivElement>(null);
     const hammerRef = useRef<HTMLDivElement>(null);
+
+    // Refs for game logic
+    const isHit = useRef<boolean>(false);
+    const canHit = useRef<boolean>(true);
+    const moleType = useRef<string>('basic');
 
     // Mole animation
     const moleSpringApi = useSpringRef();
@@ -50,14 +52,23 @@ export default function Mole() {
         from: { transform: `rotate(-40deg)`, opacity: 0},
     });
 
+    // Hit feedback animation
+    const hitFeedbackSpringApi = useSpringRef();
+    // set initial hit feedback properties
+    const hitFeedbackSpring = useSpring({
+        ref: hitFeedbackSpringApi,
+        from: { transform: `translateY(-100%)`, opacity: 0},
+    });
+
 
     // TODO: migrate to global settings
-    const moleSpringRatio = 0.12;
-    const moleRestRatio = 0.7;
+    const moleSpringRatio = 0.2;
+    const moleRestRatio = 0.5;
 
 
     // Animation Functions
     const moleRise = () => {
+        // Animate mole rise
         moleSpringApi.start({
             to: MolePosUp,
             config: {
@@ -69,6 +80,7 @@ export default function Mole() {
 
 
     const moleRemove = () => {
+        // Animate mole remove
         moleSpringApi.start({
             to: MolePosDown,
             delay: Math.floor(moleLCT.current * moleRestRatio),
@@ -76,17 +88,23 @@ export default function Mole() {
                 duration: Math.floor(moleLCT.current * moleSpringRatio),
             },
             onRest: () => {
-                setCanHit(false);
+                canHit.current = false;
 
-                if (!isHit) {
-                    // Game Over
-                    setGameState(GameStates.OVER);
-                }
+                // THIS HERE, determines if the game is over by missing a mole hit
+                // There is a 200ms delay to check if the mole is hit
+                // without delay, the game over trigger is unreliable
+                setTimeout(() => {
+                    if (!isHit.current) {
+                        // Game Over
+                        setGameState(GameStates.OVER);
+                    }
+                }, 200);
             },
         })
     }
 
     const moleRemoveOnHit = () => {
+        // Animate mole remove when hit by hammer
         moleSpringApi.start({
             to: MolePosDown,
             delay: 100,
@@ -117,6 +135,25 @@ export default function Mole() {
         });
     }
 
+    const animateHitFeedback = () => {
+        // Animate hit feedback --------
+        const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
+        const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
+        const calcPos = molePadBottom - moleTop - 20;
+
+        hitFeedbackSpringApi.start({
+            from: { transform: `translateY(-120%)`, opacity: 0, bottom: calcPos},
+            to: [
+                { transform: `translateY(-160%)`, opacity: 1},
+                { transform: `translateY(-180%)`, opacity: 0 },
+            ],
+            delay: 120,
+            config: {
+                duration: 300,
+            },
+            reset: true,
+        });
+    }
 
     useEffect(() => {
         // Check if refs are not null
@@ -126,7 +163,7 @@ export default function Mole() {
         // TODO: migrate to global settings
         const probability = 0.2;
         if (Math.random() <= probability) {
-            setMoleType('gold');
+            moleType.current = 'gold';
             moleTypeApi.start({ 
                 to: MoleGold,
                 immediate: true,
@@ -148,18 +185,19 @@ export default function Mole() {
     }, []);
 
     const handleMouseDown = () => {
-        if (canHit) {
+        if (canHit.current) {
             // Hit the mole
             moleSpringApi.stop();
             
-            setIsHit(true);
-            setCanHit(false);
+            canHit.current = false;
+            isHit.current = true;
 
             animateHammer();
+            animateHitFeedback();
             moleRemoveOnHit();
             
             // Add score
-            const score = moleType === 'gold' ? 30 : 10;
+            const score = moleType.current === 'gold' ? 30 : 10;
             setScoreNumber(scoreNumber + score);
         }
 
@@ -177,6 +215,11 @@ export default function Mole() {
             <animated.div ref={hammerRef} style={{...HammerWrapper, ...hammerSpring}}>
                 <Hammer />
             </animated.div>
+
+            {/* Hit feedback, show score */}
+            <animated.div style={{...HitFeedbackWrapper, ...hitFeedbackSpring}}>
+                <HitFeedback hitScore={moleType.current === 'gold' ? 30 : 10}/>
+            </ animated.div>
         </div>
     )
 }
@@ -197,7 +240,17 @@ const HammerWrapper: React.CSSProperties = {
     width: '100%',
     aspectRatio: '1 / 1',
     pointerEvents: 'none',
-    opacity: 0,
+    userSelect: 'none',
+}
+
+const HitFeedbackWrapper: React.CSSProperties = {
+    position: 'absolute',
+    bottom: '0',
+    width: '100%',
+    textAlign: 'center',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    zIndex: 1,
 }
 
 const MoleContainer: React.CSSProperties = {
