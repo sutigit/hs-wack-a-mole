@@ -27,7 +27,7 @@ const GameOverStyle: React.CSSProperties = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#E9EAEE",
     fontSize: "2rem",
     fontWeight: "bold",
 }
