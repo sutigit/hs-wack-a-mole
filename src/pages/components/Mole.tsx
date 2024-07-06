@@ -285,6 +285,11 @@ const Container: React.CSSProperties = {
     width: '100%',
     height: '100%',
     position: 'relative',
+
+    // disable all touch feedback
+    WebkitTapHighlightColor: 'transparent', // For WebKit browsers
+    msTouchAction: 'manipulation', // For Microsoft browsers
+    touchAction: 'manipulation', // Standard property
 }
 
 const HammerWrapper: React.CSSProperties = {
@@ -313,6 +318,7 @@ const MoleWrapper: React.CSSProperties = {
     justifyContent: 'center',
     alignItems: 'flex-end',
     overflow: 'hidden',
+
 }
 
 const MoleBasic: React.CSSProperties = {

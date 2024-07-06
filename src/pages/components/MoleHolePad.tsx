@@ -37,6 +37,11 @@ const MoleHolePad: React.CSSProperties = {
     boxSizing: 'border-box',
     position: 'relative',
     cursor: 'pointer',
+
+    // disable all touch feedback
+    WebkitTapHighlightColor: 'transparent', // For WebKit browsers
+    msTouchAction: 'manipulation', // For Microsoft browsers
+    touchAction: 'manipulation', // Standard property
 }
 
 const Hole: React.CSSProperties = {
