@@ -9,8 +9,8 @@ export default function StartScreen() {
 
     return gameState === GameStates.READY && (
         <div style={StartMenuStyle}>
-            <p style={{fontSize: '1rem', fontWeight: 'bold'}}>Tre Buche presents</p>
-            <p style={{fontSize: '3rem', fontWeight: 'bold'}}>Wack-a-mole</p>
+            <div style={{fontSize: '1rem', fontWeight: 'bold', marginBottom: '20px'}}>Tre Buche presents</div>
+            <div style={{fontSize: '3rem', fontWeight: 'bold', marginBottom: '40px'}}>Wack-a-mole</div>
             <button onClick={() => setGameState(GameStates.STARTED)} style={StartButton}>Start</button>
         </div>
     )
