@@ -27,7 +27,7 @@ const StartMenuStyle: React.CSSProperties = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    backgroundColor: "#E9EAEE",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
 }
 
 const StartButton: React.CSSProperties = {
