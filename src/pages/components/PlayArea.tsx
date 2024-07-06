@@ -21,12 +21,12 @@ export default function PlayArea() {
     if (gameState === GameStates.STARTED) {
       // Reset initial values
       moleSWI.current = 3000
-      moleLCT.current = 2500
+      moleLCT.current = 2600
+      setLuckyNumberMole(null)
       setScoreNumber(0)
 
       // 1000ms delay to start spawning moles
       nextIntervalSetup(1000)
-
     }
 
     else if (gameState === GameStates.OVER) {      
