@@ -24,8 +24,13 @@ const defaultValue = {
     scoreNumber: 0,
     setScoreNumber: () => {},
 
+    // mole spawn window interval time
     moleSWI: 3000,
+
+    // mole life cycle time
     moleLCT: 2500,
+
+    // mole spawn window interval time should be higher than mole life cycle timse
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
