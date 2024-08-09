@@ -4,6 +4,7 @@ import PlayArea from "../components/PlayArea";
 import Score from "../components/Score";
 import StartScreen from "../components/StartScreen";
 import GameOverScreen from "../components/GameOverScreen";
+import Editor from "../components/Editor";
 
 // Context
 import { GameProvider } from "../contexts/GameContext";
@@ -19,16 +20,24 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <main style={MainContainer}>  
         <GameProvider>
+
           <section style={PlayAreaStyle}>
             <StartScreen />
             <GameOverScreen />
             <Score />
             <PlayArea />
           </section>
+
+          <section style={EditorAreaStyle}>
+            <Editor />
+          </section>
+
         </GameProvider>
       </main>
+
     </>
   );
 }
@@ -36,22 +45,32 @@ export default function Home() {
 const MainContainer: React.CSSProperties = {
   fontFamily: 'Arial, sans-serif',
   flex: 1,
+  gap: "40px",
   display: "flex",
+  flexWrap: "wrap",
   justifyContent: "center",
-  alignItems: "center",
+  alignItems: "flex-start",
   backgroundColor: "#E9EAEE",
-  height: "100vh",
+  minHeight: "100vh",
+  paddingTop: "10vh",
 };
 
 const PlayAreaStyle: React.CSSProperties = {
-  paddingTop: "3vh",
-  paddingBottom: "5px",
+  position: "relative",
   width: "100%",
   maxWidth: "450px",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
-  margin: "auto",
   backgroundColor: "#FFFFFF",
+};
+
+const EditorAreaStyle: React.CSSProperties = {
+  position: "relative",
+  width: "100%",
+  maxWidth: "450px",
+  minHeight: "50vh",
+  display: "flex",
+  flexDirection: "column",
 };
