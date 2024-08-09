@@ -52,13 +52,13 @@ const MainContainer: React.CSSProperties = {
   alignItems: "flex-start",
   backgroundColor: "#E9EAEE",
   minHeight: "100vh",
-  paddingTop: "10vh",
+  padding: "10vh 0"
 };
 
 const PlayAreaStyle: React.CSSProperties = {
   position: "relative",
   width: "100%",
-  maxWidth: "450px",
+  maxWidth: "400px",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
