@@ -7,8 +7,6 @@ interface GameContextProps {
     scoreNumber: number;
     setScoreNumber: React.Dispatch<React.SetStateAction<number>>;
 
-    moleSWI: any;
-    moleLCT: any;
 
     // NEW SPAWN SYSTEM
     moleRiseTime: number;
@@ -40,28 +38,22 @@ const defaultValue = {
     scoreNumber: 0,
     setScoreNumber: () => {},
 
-    // mole spawn window interval time should be higher than mole life cycle timse
-    // mole spawn window interval time
-    moleSWI: 3000,
-
-    // mole life cycle time
-    moleLCT: 2500,
 
 
     // NEW SPAWN SYSTEM
-    moleRiseTime: 100,
+    moleRiseTime: 400,
     setMoleRiseTime: () => {},
 
-    moleUpTime: 1000,
+    moleUpTime: 1200,
     setMoleUpTime: () => {},
 
-    moleHideTime: 100,
+    moleHideTime: 400,
     setMoleHideTime: () => {},
 
-    nextMoleMinTime: 1000,
+    nextMoleMinTime: 2000,
     setNextMoleMinTime: () => {},
 
-    nextMoleMaxTime: 2000,
+    nextMoleMaxTime: 3000,
     setNextMoleMaxTime: () => {},
 };
 
@@ -79,16 +71,14 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
     const [scoreNumber, setScoreNumber] = useState(defaultValue.scoreNumber);
 
-    const moleSWI = useRef(defaultValue.moleSWI);
-    const moleLCT = useRef(defaultValue.moleLCT);
 
     // NEW SPAWN SYSTEM
-    const [moleRiseTime, setMoleRiseTime] = useState(100);
-    const [moleUpTime, setMoleUpTime] = useState(1000);
-    const [moleHideTime, setMoleHideTime] = useState(100);
+    const [moleRiseTime, setMoleRiseTime] = useState(400);
+    const [moleUpTime, setMoleUpTime] = useState(1200);
+    const [moleHideTime, setMoleHideTime] = useState(400);
 
-    const [nextMoleMinTime, setNextMoleMinTime] = useState(1000);
-    const [nextMoleMaxTime, setNextMoleMaxTime] = useState(2000);
+    const [nextMoleMinTime, setNextMoleMinTime] = useState(2000);
+    const [nextMoleMaxTime, setNextMoleMaxTime] = useState(3000);
 
     const value = {
         // game states
@@ -99,11 +89,6 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         scoreNumber,
         setScoreNumber,
         
-        // mole spawn window interval time
-        moleSWI,
-
-        // mole life cycle time
-        moleLCT,
 
         // NEW SPAWN SYSTEM
         moleRiseTime,

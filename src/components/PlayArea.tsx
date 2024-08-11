@@ -1,90 +1,60 @@
 import React, { useEffect, useContext, useState } from 'react'
 
-import {GameContext, GameStates} from '../contexts/GameContext'
+import { GameContext, GameStates } from '../contexts/GameContext'
 
 import MoleHolePad from './MoleHolePad'
 
-
 export default function PlayArea() {
 
-  const [timeOutHandle, setTimeOutHandle] = useState<NodeJS.Timeout | null>(null)
-  const [luckyNumberMole, setLuckyNumberMole] = useState<number | null>(null)
-  
+  // const [timeOutHandle, setTimeOutHandle] = useState<NodeJS.Timeout | null>(null)
+  const [activeMoles, setActiveMoles] = useState<number[] | null>(null)
+
   const {
-    moleSWI,
-    moleLCT,
     gameState,
     setScoreNumber,
   } = useContext(GameContext)
 
   useEffect(() => {
     if (gameState === GameStates.STARTED) {
-      // Reset initial values
-      moleSWI.current = 3000
-      moleLCT.current = 2600
-      setLuckyNumberMole(null)
-      setScoreNumber(0)
-
       // 1000ms delay to start spawning moles
-      nextIntervalSetup(1000)
+      setTimeout(() => {
+        nextMole()
+      }, 1000)
     }
 
-    else if (gameState === GameStates.OVER) {      
-      if (timeOutHandle) {
-        clearTimeout(timeOutHandle)
-      }
+    else if (gameState === GameStates.OVER || gameState === GameStates.READY) {
+      // Reset initial values
+      setActiveMoles(null)
+      setScoreNumber(0)
     }
 
-    // Cleanup when component unmounts
-    return () => {
-      if (timeOutHandle) {
-        clearTimeout(timeOutHandle)
-      }
-    }
   }, [gameState])
 
 
-  const nextIntervalSetup = (time: number) => {
-    const tmHandle = setTimeout(() => {
+  const nextMole = () => {
 
-      // TODO: migrate to global settings
-      if (moleSWI.current > 1200) {
-        // Mole Spawn Window Interval
-        moleSWI.current -= 100
-      }
-
-      if (moleLCT.current > 1000) {
-        // Mole Life Cycle Time
-        moleLCT.current -= 90
-      }
-
-      // generate random number 0-8
-      const randint = Math.floor(Math.random() * 9)
-
-      // select random mole
-      setLuckyNumberMole(randint)
-
-      
-      nextIntervalSetup(moleSWI.current) 
-    }, time)
-
-    setTimeOutHandle(tmHandle)
+    // Select new random mole ------------
+    // generate random number 0-8
+    const randint1 = Math.floor(Math.random() * 9)
+    // const randint2 = Math.floor(Math.random() * 9)
+    // Set the new mole
+    setActiveMoles([randint1])
   }
-  
+
 
   return (
     <div style={Container}>
-        <section style={GridContainer}>
-          <MoleHolePad selected={luckyNumberMole === 0} />
-          <MoleHolePad selected={luckyNumberMole === 1} />
-          <MoleHolePad selected={luckyNumberMole === 2} />
-          <MoleHolePad selected={luckyNumberMole === 3} />
-          <MoleHolePad selected={luckyNumberMole === 4} />
-          <MoleHolePad selected={luckyNumberMole === 5} />
-          <MoleHolePad selected={luckyNumberMole === 6} />
-          <MoleHolePad selected={luckyNumberMole === 7} />
-          <MoleHolePad selected={luckyNumberMole === 8} />
-        </section>
+      <section style={GridContainer}>
+        <MoleHolePad selected={!!activeMoles?.includes(0)} />
+        <MoleHolePad selected={!!activeMoles?.includes(1)} />
+        <MoleHolePad selected={!!activeMoles?.includes(2)} />
+        <MoleHolePad selected={!!activeMoles?.includes(3)} />
+        <MoleHolePad selected={!!activeMoles?.includes(4)} />
+        <MoleHolePad selected={!!activeMoles?.includes(5)} />
+        <MoleHolePad selected={!!activeMoles?.includes(6)} />
+        <MoleHolePad selected={!!activeMoles?.includes(7)} />
+        <MoleHolePad selected={!!activeMoles?.includes(8)} />
+      </section>
     </div>
   )
 }

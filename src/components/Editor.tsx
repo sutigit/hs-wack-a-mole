@@ -14,10 +14,19 @@ export default function Page() {
 
         // NEW SPAWN SYSTEM
         moleRiseTime,
+        setMoleRiseTime,
+
         moleUpTime,
+        setMoleUpTime,
+
         moleHideTime,
+        setMoleHideTime,
+
         nextMoleMinTime,
+        setNextMoleMinTime,
+
         nextMoleMaxTime,
+        setNextMoleMaxTime,
     } = useContext(GameContext)
 
 
@@ -33,27 +42,27 @@ export default function Page() {
 
     const handleMoleRiseTime = (e: any) => {
         setGameState(GameStates.READY);
-        // moleRiseTime = e.target.value;
+        setMoleRiseTime(e.target.value);
     }
 
     const handleMoleUpTime = (e: any) => {
         setGameState(GameStates.READY);
-        // moleUpTime = e.target.value;
+        setMoleUpTime(e.target.value);
     }
 
     const handleMoleHideTime = (e: any) => {
         setGameState(GameStates.READY);
-        // moleHideTime = e.target.value;
+        setMoleHideTime(e.target.value);
     }
 
     const handleNextMoleMinTime = (e: any) => {
         setGameState(GameStates.READY);
-        // nextMoleMinTime = e.target.value;
+        setNextMoleMinTime(e.target.value);
     }
 
     const handleNextMoleMaxTime = (e: any) => {
         setGameState(GameStates.READY);
-        // nextMoleMaxTime = e.target.value;
+        setNextMoleMaxTime(e.target.value);
     }
 
     return (
