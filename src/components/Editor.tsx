@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 
-export default function Page() {
+export default function Page() {   
     const [acceleration, setAcceleration] = useState(30);
     const [moleCount, setMoleCount] = useState(1);
 
