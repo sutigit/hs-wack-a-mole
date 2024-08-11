@@ -1,17 +1,59 @@
 'use client';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
+// Context
+import { GameContext, GameStates } from '../contexts/GameContext'
 
-export default function Page() {   
+export default function Page() {
     const [acceleration, setAcceleration] = useState(30);
     const [moleCount, setMoleCount] = useState(1);
 
+    // Context states
+    const {
+        setGameState,
+
+        // NEW SPAWN SYSTEM
+        moleRiseTime,
+        moleUpTime,
+        moleHideTime,
+        nextMoleMinTime,
+        nextMoleMaxTime,
+    } = useContext(GameContext)
+
+
     const handleAcceleration = (e: any) => {
+        setGameState(GameStates.READY);
         setAcceleration(e.target.value);
     }
 
     const handleMoleCount = (e: any) => {
+        setGameState(GameStates.READY);
         setMoleCount(e.target.value);
+    }
+
+    const handleMoleRiseTime = (e: any) => {
+        setGameState(GameStates.READY);
+        // moleRiseTime = e.target.value;
+    }
+
+    const handleMoleUpTime = (e: any) => {
+        setGameState(GameStates.READY);
+        // moleUpTime = e.target.value;
+    }
+
+    const handleMoleHideTime = (e: any) => {
+        setGameState(GameStates.READY);
+        // moleHideTime = e.target.value;
+    }
+
+    const handleNextMoleMinTime = (e: any) => {
+        setGameState(GameStates.READY);
+        // nextMoleMinTime = e.target.value;
+    }
+
+    const handleNextMoleMaxTime = (e: any) => {
+        setGameState(GameStates.READY);
+        // nextMoleMaxTime = e.target.value;
     }
 
     return (
@@ -22,36 +64,36 @@ export default function Page() {
                 <h2>Myyrien nopeus - lähtönopeudet muuttujille</h2>
                 <div style={InputContainer}>
                     <strong>Ylös</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
-                        <input style={NumberStyle} type="number" name="riseSpeed" step={0.01} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <input style={NumberStyle} type="number" name="riseSpeed" step={1} defaultValue={moleRiseTime} onChange={handleMoleRiseTime}/>
                         <label htmlFor="riseSpeed">ms</label>
                     </div>
                 </div>
 
                 <div style={InputContainer}>
                     <strong>Kauanko pysyy ylhäällä</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
-                        <input style={NumberStyle} type="number" name="upTime" step={0.01} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <input style={NumberStyle} type="number" name="upTime" step={1} defaultValue={moleUpTime} onChange={handleMoleUpTime}/>
                         <label htmlFor="upTime">ms</label>
                     </div>
                 </div>
 
                 <div style={InputContainer}>
                     <strong>Alas</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
-                        <input style={NumberStyle} type="number" name="removeSpeed" step={0.01} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <input style={NumberStyle} type="number" name="removeSpeed" step={1} defaultValue={moleHideTime} onChange={handleMoleHideTime}/>
                         <label htmlFor="removeSpeed">ms</label>
                     </div>
                 </div>
 
                 <div style={InputContainer}>
                     <strong>Kuinka nopeasti seuraava myyrä nousee</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
-                        <input style={NumberStyle} type="number" name="nextMoleSpeedMin" step={0.01} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <input style={NumberStyle} type="number" name="nextMoleSpeedMin" step={1} defaultValue={nextMoleMinTime} onChange={handleNextMoleMinTime}/>
                         <label htmlFor="nextMoleSpeedMin">min ms</label>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
-                        <input style={NumberStyle} type="number" name="nextMoleSpeedMax" step={0.01} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <input style={NumberStyle} type="number" name="nextMoleSpeedMax" step={1} defaultValue={nextMoleMaxTime} onChange={handleNextMoleMaxTime}/>
                         <label htmlFor="nextMoleSpeedMax">max ms</label>
                     </div>
                 </div>
@@ -61,8 +103,8 @@ export default function Page() {
                 {/* GAME SPEED INCREASE */}
                 <h2>Pelin kiihtyminen</h2>
                 <div style={InputContainer}>
-                    <strong>kuinka nopeasti peli kiihtyy (over-time-kerroin)</strong>
-                    <input style={SliderStyle} type="range" step={1} min={20} max={60} value={acceleration} onChange={handleAcceleration} />
+                    <strong>kuinka nopeasti peli kiihtyy (over-time-kerroin, 1:ssä peli ei kiihdy)</strong>
+                    <input style={SliderStyle} type="range" step={1} min={1} max={100} value={acceleration} onChange={handleAcceleration} />
                     <span>Kerroin: {acceleration}</span>
                 </div>
 
@@ -76,7 +118,7 @@ export default function Page() {
 
                 <div style={InputContainer}>
                     <strong>Kiihtymisen yläraja</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                         <input style={NumberStyle} type="number" name="accelerationCap" step={0.01} />
                         <label htmlFor="accelerationCap">myyrää / minuutti</label>
                     </div>
@@ -109,7 +151,7 @@ export default function Page() {
 
                 <div style={InputContainer}>
                     <strong>Aika intervalli milloin myyrien määrä moninkertaisuu</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                         <input style={NumberStyle} type="number" name="moleMultiplyIntervalTime" step={0.01} />
                         <label htmlFor="moleMultiplyIntervalTime">ms</label>
                     </div>
@@ -118,7 +160,7 @@ export default function Page() {
 
                 <div style={InputContainer}>
                     <strong>Piste intervalli milloin myyrien määrä moninkertaisuu</strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px"}}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                         <input style={NumberStyle} type="number" name="moleMultiplyIntervalPoints" step={0.01} />
                         <label htmlFor="moleMultiplyIntervalPoints">pistettä</label>
                     </div>

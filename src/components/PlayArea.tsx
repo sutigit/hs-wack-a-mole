@@ -35,6 +35,7 @@ export default function PlayArea() {
       }
     }
 
+    // Cleanup when component unmounts
     return () => {
       if (timeOutHandle) {
         clearTimeout(timeOutHandle)

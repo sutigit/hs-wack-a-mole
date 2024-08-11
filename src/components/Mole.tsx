@@ -15,6 +15,13 @@ export default function Mole() {
         scoreNumber,
         setScoreNumber,
         setGameState,
+
+        // NEW SPAWN SYSTEM
+        moleRiseTime,
+        moleUpTime,
+        moleHideTime,
+        nextMoleMinTime,
+        nextMoleMaxTime,
     } = useContext(GameContext)
 
     // States
@@ -62,7 +69,8 @@ export default function Mole() {
 
     // Animation Functions
     const animateMoleRise = () => {
-        // Animate mole rise -------
+        // Animate how the mole rises from the mole pad
+        // and start next animation
         moleSpringApi.start({
             to: MolePosUp,
             config: {
@@ -74,7 +82,7 @@ export default function Mole() {
 
 
     const animateMoleRemove = () => {
-        // Animate mole remove -------
+        // Animation and functions when mole uptime expires and it starts to hide
         moleSpringApi.start({
             to: MolePosDown,
             delay: Math.floor(moleLCT.current * moleRestRatio),
@@ -102,7 +110,7 @@ export default function Mole() {
     }
 
     const animateMoleRemoveOnHit = () => {
-        // Animate mole remove when hit by hammer -------
+        // Separate animation for mole remove on hit
         moleSpringApi.start({
             to: MolePosDown,
             delay: 100,
@@ -114,7 +122,7 @@ export default function Mole() {
 
 
     const animateHammer = () => {
-        // Animate hammer ---------
+        // Swinging animation for the hammer
         const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
         const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
         const calcPos = molePadBottom - moleTop - 20;
@@ -133,8 +141,8 @@ export default function Mole() {
         });
     }
 
-    const animateHitFeedback = () => {
-        // Animate hit feedback --------
+    const animateScore = () => {
+        // Animation for the score number that appears when the mole is hit
         const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
         const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
         const calcPos = molePadBottom - moleTop - 20;
@@ -205,7 +213,7 @@ export default function Mole() {
                 // Add score
                 const score = moleType === 'gold' ? 30 : 10;
                 setScoreNumber(scoreNumber + score);
-                animateHitFeedback();
+                animateScore();
                 animateMoleRemoveOnHit();
 
             } else if (moleType === 'spike') {

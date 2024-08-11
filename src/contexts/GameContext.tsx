@@ -9,6 +9,22 @@ interface GameContextProps {
 
     moleSWI: any;
     moleLCT: any;
+
+    // NEW SPAWN SYSTEM
+    moleRiseTime: number;
+    setMoleRiseTime: React.Dispatch<React.SetStateAction<number>>;
+
+    moleUpTime: number;
+    setMoleUpTime: React.Dispatch<React.SetStateAction<number>>;
+
+    moleHideTime: number;
+    setMoleHideTime: React.Dispatch<React.SetStateAction<number>>;
+
+    nextMoleMinTime: number;
+    setNextMoleMinTime: React.Dispatch<React.SetStateAction<number>>;
+
+    nextMoleMaxTime: number;
+    setNextMoleMaxTime: React.Dispatch<React.SetStateAction<number>>;
 }
 
 enum GameStates {
@@ -24,13 +40,29 @@ const defaultValue = {
     scoreNumber: 0,
     setScoreNumber: () => {},
 
+    // mole spawn window interval time should be higher than mole life cycle timse
     // mole spawn window interval time
     moleSWI: 3000,
 
     // mole life cycle time
     moleLCT: 2500,
 
-    // mole spawn window interval time should be higher than mole life cycle timse
+
+    // NEW SPAWN SYSTEM
+    moleRiseTime: 100,
+    setMoleRiseTime: () => {},
+
+    moleUpTime: 1000,
+    setMoleUpTime: () => {},
+
+    moleHideTime: 100,
+    setMoleHideTime: () => {},
+
+    nextMoleMinTime: 1000,
+    setNextMoleMinTime: () => {},
+
+    nextMoleMaxTime: 2000,
+    setNextMoleMaxTime: () => {},
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
@@ -50,6 +82,14 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const moleSWI = useRef(defaultValue.moleSWI);
     const moleLCT = useRef(defaultValue.moleLCT);
 
+    // NEW SPAWN SYSTEM
+    const [moleRiseTime, setMoleRiseTime] = useState(100);
+    const [moleUpTime, setMoleUpTime] = useState(1000);
+    const [moleHideTime, setMoleHideTime] = useState(100);
+
+    const [nextMoleMinTime, setNextMoleMinTime] = useState(1000);
+    const [nextMoleMaxTime, setNextMoleMaxTime] = useState(2000);
+
     const value = {
         // game states
         gameState,
@@ -64,6 +104,22 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
         // mole life cycle time
         moleLCT,
+
+        // NEW SPAWN SYSTEM
+        moleRiseTime,
+        setMoleRiseTime,
+
+        moleUpTime,
+        setMoleUpTime,
+
+        moleHideTime,
+        setMoleHideTime,
+
+        nextMoleMinTime,
+        setNextMoleMinTime,
+
+        nextMoleMaxTime,
+        setNextMoleMaxTime,
     }
 
     return (
