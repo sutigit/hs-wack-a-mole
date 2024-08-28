@@ -8,7 +8,7 @@ interface GameContextProps {
     setScoreNumber: React.Dispatch<React.SetStateAction<number>>;
 
 
-    // NEW SPAWN SYSTEM
+    // MOLE BEHAVIOUR TIMINGS
     moleRiseTime: number;
     setMoleRiseTime: React.Dispatch<React.SetStateAction<number>>;
 
@@ -24,18 +24,29 @@ interface GameContextProps {
     nextMoleMaxTime: number;
     setNextMoleMaxTime: React.Dispatch<React.SetStateAction<number>>;
 
-    // Muliple moles system
+    // MOLE COUNT INCREASE
     maxNumOfMoles: number;
     setMaxNumOfMoles: React.Dispatch<React.SetStateAction<number>>;
 
-    shouldBeNumOfMoles: number;
-    setShouldBeNumOfMoles: React.Dispatch<React.SetStateAction<number>>;
+    moleIncreaseStrategy: MoleIncreaseStrategies
+    setMoleIncreaseStrategy: React.Dispatch<React.SetStateAction<MoleIncreaseStrategies>>;
+
+    moleIncreaseTimeInterval: number;
+    setMoleIncreaseTimeInterval: React.Dispatch<React.SetStateAction<number>>;
+
+    moleIncreaseScoreInterval: number;
+    setMoleIncreaseScoreInterval: React.Dispatch<React.SetStateAction<number>>;
 }
 
 enum GameStates {
     READY = "READY",
     STARTED = "STARTED",
     OVER = "OVER",
+}
+
+enum MoleIncreaseStrategies {
+    TIME = "TIME",
+    SCORE = "SCORE",
 }
 
 const defaultValue = {
@@ -46,8 +57,7 @@ const defaultValue = {
     setScoreNumber: () => {},
 
 
-
-    // NEW SPAWN SYSTEM
+    // MOLE BEHAVIOUR TIMINGS
     moleRiseTime: 400,
     setMoleRiseTime: () => {},
 
@@ -63,12 +73,18 @@ const defaultValue = {
     nextMoleMaxTime: 3000,
     setNextMoleMaxTime: () => {},
 
-    // Multiple moles system
+    // MOLE COUNT INCREASE
     maxNumOfMoles: 1,
     setMaxNumOfMoles: () => {},
 
-    shouldBeNumOfMoles: 1,
-    setShouldBeNumOfMoles: () => {},
+    moleIncreaseStrategy: MoleIncreaseStrategies.TIME, // TIME or SCORE
+    setMoleIncreaseStrategy: () => {},
+
+    moleIncreaseTimeInterval: 10000, // 10 seconds
+    setMoleIncreaseTimeInterval: () => {},
+
+    moleIncreaseScoreInterval: 300, // 300 points
+    setMoleIncreaseScoreInterval: () => {},
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
@@ -86,7 +102,7 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const [scoreNumber, setScoreNumber] = useState(defaultValue.scoreNumber);
 
 
-    // NEW SPAWN SYSTEM
+    // MOLE BEHAVIOUR TIMINGS
     const [moleRiseTime, setMoleRiseTime] = useState(400);
     const [moleUpTime, setMoleUpTime] = useState(1200);
     const [moleHideTime, setMoleHideTime] = useState(400);
@@ -94,9 +110,11 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const [nextMoleMinTime, setNextMoleMinTime] = useState(2000);
     const [nextMoleMaxTime, setNextMoleMaxTime] = useState(3000);
 
-    // Multiple moles system
+    // MOLE COUNT INCREASE
     const [maxNumOfMoles, setMaxNumOfMoles] = useState(1);
-    const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(1);
+    const [moleIncreaseStrategy, setMoleIncreaseStrategy] = useState(MoleIncreaseStrategies.TIME);
+    const [moleIncreaseTimeInterval, setMoleIncreaseTimeInterval] = useState(10000);
+    const [moleIncreaseScoreInterval, setMoleIncreaseScoreInterval] = useState(300);
 
     const value = {
         // game states
@@ -108,7 +126,7 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         setScoreNumber,
         
 
-        // NEW SPAWN SYSTEM
+        // MOLE BEHAVIOUR TIMINGS
         moleRiseTime,
         setMoleRiseTime,
 
@@ -124,13 +142,18 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         nextMoleMaxTime,
         setNextMoleMaxTime,
 
-        // Multiple moles system
+        // MOLE COUNT INCREASE
         maxNumOfMoles,
         setMaxNumOfMoles,
 
-        shouldBeNumOfMoles,
-        setShouldBeNumOfMoles,
-        
+        moleIncreaseStrategy,
+        setMoleIncreaseStrategy,
+
+        moleIncreaseTimeInterval,
+        setMoleIncreaseTimeInterval,
+
+        moleIncreaseScoreInterval,
+        setMoleIncreaseScoreInterval,
     }
 
     return (
@@ -140,4 +163,4 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     );
 };
 
-export { GameProvider, GameContext,  GameStates};
+export { GameProvider, GameContext,  GameStates, MoleIncreaseStrategies};
