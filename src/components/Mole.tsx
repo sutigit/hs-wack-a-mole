@@ -83,10 +83,10 @@ export default function Mole({
         moleSpringApi.start({
             to: MolePosUp,
 
-            // determines how long it takes for the mole to start rising
+            // determines how long it takes for the mole to START rising
             delay: randomBetween(nextMoleMinTime, nextMoleMaxTime),
 
-            // animates the mole rise duration
+            // determines how long it takes for the mole to rise
             config: {
                 duration: Math.floor(moleRiseTime),
             },
@@ -103,7 +103,7 @@ export default function Mole({
             // determines how long the mole stays up
             delay: Math.floor(moleUpTime),
 
-            // animates the mole hide duration
+            // determines how long it takes for the mole to hide
             config: {
                 duration: Math.floor(moleHideTime),
             },
@@ -129,14 +129,15 @@ export default function Mole({
                     }, 200);
                 }
 
-                // Trigger next mole via AMR system
-                setActiveMoles(activeMoles.filter((moleNum) => moleNum !== moleIndex));
+                else if (moleTypeRef.current === 'spike') {
+                    // Trigger next mole via AMR system
+                    setActiveMoles(activeMoles.filter((moleNum) => moleNum !== moleIndex));
+                }
             },
         })
     }
 
     const logicAndAnimMoleRemoveOnHit = () => {
-        // Separate animation for mole remove on hit
         moleSpringApi.start({
             to: MolePosDown,
             delay: 100,
@@ -144,8 +145,6 @@ export default function Mole({
                 duration: Math.floor(moleHideTime),
             },
             onRest: () => {
-                // setCanHit(false);
-
                 // Trigger next mole via AMR system
                 setActiveMoles(activeMoles.filter((moleNum) => moleNum !== moleIndex));
             }
@@ -154,7 +153,6 @@ export default function Mole({
 
 
     // Pure animation functions --------------------
-
     const animHammer = () => {
         // Swinging animation for the hammer
         const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
@@ -225,7 +223,7 @@ export default function Mole({
     }, []);
 
     useEffect(() => {
-        if (gameState == GameStates.READY || gameState == GameStates.OVER) {
+        if (gameState !== GameStates.STARTED) {
             // cancel animations
             moleSpringApi.stop();
             hammerSpringApi.stop();

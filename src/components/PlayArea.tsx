@@ -10,7 +10,7 @@ export default function PlayArea() {
   // const [timeOutHandle, setTimeOutHandle] = useState<NodeJS.Timeout | null>(null)
   const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   const [activeMoles, setActiveMoles] = useState<number[]>([]);
-  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(1);
+  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(2);
 
   const {
     gameState,
