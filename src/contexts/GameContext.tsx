@@ -31,11 +31,11 @@ interface GameContextProps {
     moleIncreaseStrategy: MoleIncreaseStrategies
     setMoleIncreaseStrategy: React.Dispatch<React.SetStateAction<MoleIncreaseStrategies>>;
 
-    moleIncreaseTimeInterval: number;
-    setMoleIncreaseTimeInterval: React.Dispatch<React.SetStateAction<number>>;
+    moleIncreaseByTimeInterval: number;
+    setMoleIncreaseByTimeInterval: React.Dispatch<React.SetStateAction<number>>;
 
-    moleIncreaseScoreInterval: number;
-    setMoleIncreaseScoreInterval: React.Dispatch<React.SetStateAction<number>>;
+    moleIncreaseByScoreInterval: number;
+    setMoleIncreaseByScoreInterval: React.Dispatch<React.SetStateAction<number>>;
 }
 
 enum GameStates {
@@ -74,26 +74,22 @@ const defaultValue = {
     setNextMoleMaxTime: () => {},
 
     // MOLE COUNT INCREASE
-    maxNumOfMoles: 1,
+    maxNumOfMoles: 3,
     setMaxNumOfMoles: () => {},
 
     moleIncreaseStrategy: MoleIncreaseStrategies.TIME, // TIME or SCORE
     setMoleIncreaseStrategy: () => {},
 
-    moleIncreaseTimeInterval: 10000, // 10 seconds
-    setMoleIncreaseTimeInterval: () => {},
+    moleIncreaseByTimeInterval: 10000, // 10 seconds
+    setMoleIncreaseByTimeInterval: () => {},
 
-    moleIncreaseScoreInterval: 300, // 300 points
-    setMoleIncreaseScoreInterval: () => {},
+    moleIncreaseByScoreInterval: 300, // 300 points
+    setMoleIncreaseByScoreInterval: () => {},
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
 
-interface GameProviderProps {
-    children: ReactNode;
-}
-
-const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
+const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
 
     
@@ -103,18 +99,18 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
 
     // MOLE BEHAVIOUR TIMINGS
-    const [moleRiseTime, setMoleRiseTime] = useState(400);
-    const [moleUpTime, setMoleUpTime] = useState(1200);
-    const [moleHideTime, setMoleHideTime] = useState(400);
+    const [moleRiseTime, setMoleRiseTime] = useState(defaultValue.moleRiseTime);
+    const [moleUpTime, setMoleUpTime] = useState(defaultValue.moleUpTime);
+    const [moleHideTime, setMoleHideTime] = useState(defaultValue.moleHideTime);
 
-    const [nextMoleMinTime, setNextMoleMinTime] = useState(2000);
-    const [nextMoleMaxTime, setNextMoleMaxTime] = useState(3000);
+    const [nextMoleMinTime, setNextMoleMinTime] = useState(defaultValue.nextMoleMinTime);
+    const [nextMoleMaxTime, setNextMoleMaxTime] = useState(defaultValue.nextMoleMaxTime);
 
     // MOLE COUNT INCREASE
-    const [maxNumOfMoles, setMaxNumOfMoles] = useState(1);
-    const [moleIncreaseStrategy, setMoleIncreaseStrategy] = useState(MoleIncreaseStrategies.TIME);
-    const [moleIncreaseTimeInterval, setMoleIncreaseTimeInterval] = useState(10000);
-    const [moleIncreaseScoreInterval, setMoleIncreaseScoreInterval] = useState(300);
+    const [maxNumOfMoles, setMaxNumOfMoles] = useState(3);
+    const [moleIncreaseStrategy, setMoleIncreaseStrategy] = useState(defaultValue.moleIncreaseStrategy);
+    const [moleIncreaseByTimeInterval, setMoleIncreaseByTimeInterval] = useState(defaultValue.moleIncreaseByTimeInterval);
+    const [moleIncreaseByScoreInterval, setMoleIncreaseByScoreInterval] = useState(defaultValue.moleIncreaseByScoreInterval);
 
     const value = {
         // game states
@@ -149,11 +145,11 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         moleIncreaseStrategy,
         setMoleIncreaseStrategy,
 
-        moleIncreaseTimeInterval,
-        setMoleIncreaseTimeInterval,
+        moleIncreaseByTimeInterval,
+        setMoleIncreaseByTimeInterval,
 
-        moleIncreaseScoreInterval,
-        setMoleIncreaseScoreInterval,
+        moleIncreaseByScoreInterval,
+        setMoleIncreaseByScoreInterval,
     }
 
     return (

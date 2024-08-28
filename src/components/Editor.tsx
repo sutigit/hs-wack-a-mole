@@ -34,11 +34,11 @@ export default function Page() {
         moleIncreaseStrategy,
         setMoleIncreaseStrategy,
 
-        moleIncreaseTimeInterval,
-        setMoleIncreaseTimeInterval,
+        moleIncreaseByTimeInterval,
+        setMoleIncreaseByTimeInterval,
 
-        moleIncreaseScoreInterval,
-        setMoleIncreaseScoreInterval,
+        moleIncreaseByScoreInterval,
+        setMoleIncreaseByScoreInterval,
 
         // MOLE ACCELERATION
     } = useContext(GameContext)
@@ -47,39 +47,54 @@ export default function Page() {
     // MOLE BEHAVIOUR TIMINGS
     const handleMoleRiseTime = (e: any) => {
         setGameState(GameStates.READY);
-        setMoleRiseTime(e.target.value);
+        setMoleRiseTime(Number(e.target.value));
     }
 
     const handleMoleUpTime = (e: any) => {
         setGameState(GameStates.READY);
-        setMoleUpTime(e.target.value);
+        setMoleUpTime(Number(e.target.value));
     }
 
     const handleMoleHideTime = (e: any) => {
         setGameState(GameStates.READY);
-        setMoleHideTime(e.target.value);
+        setMoleHideTime(Number(e.target.value));
     }
 
     const handleNextMoleMinTime = (e: any) => {
         setGameState(GameStates.READY);
-        setNextMoleMinTime(e.target.value);
+        setNextMoleMinTime(Number(e.target.value));
     }
 
     const handleNextMoleMaxTime = (e: any) => {
         setGameState(GameStates.READY);
-        setNextMoleMaxTime(e.target.value);
+        setNextMoleMaxTime(Number(e.target.value));
     }
 
     // MOLE COUNT INCREASE
     const handleMoleCount = (e: any) => {
         setGameState(GameStates.READY);
-        setMaxNumOfMoles(e.target.value);
+        setMaxNumOfMoles(Number(e.target.value));
+    }
+
+    const handleMoleIncreaseStrategy = (strategy: MoleIncreaseStrategies) => {
+        setGameState(GameStates.READY);
+        setMoleIncreaseStrategy(strategy);
+    }
+
+    const handleMoleIncreaseByTimeInterval = (e: any) => {
+        setGameState(GameStates.READY);
+        setMoleIncreaseByTimeInterval((Number(e.target.value)));
+    }
+
+    const handleMoleIncreaseByScoreInterval = (e: any) => {
+        setGameState(GameStates.READY);
+        setMoleIncreaseByScoreInterval(Number(e.target.value));
     }
 
     // MOLE ACCELERATION
     const handleAcceleration = (e: any) => {
         setGameState(GameStates.READY);
-        setAcceleration(e.target.value);
+        setAcceleration(Number(e.target.value));
     }
 
     return (
@@ -180,31 +195,55 @@ export default function Page() {
                     <strong>Tapa minkä perusteella myyrät alkaa nousta samanaikaisesti</strong>
                     <div style={RadioStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <input type="radio" name="aika" />
-                            <label htmlFor="aika">Ajan perusteella</label>
+                            <input 
+                                type="radio" 
+                                name="moleIncreaseByTime" 
+                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.TIME} 
+                                onChange={() => handleMoleIncreaseStrategy(MoleIncreaseStrategies.TIME)}
+                                />
+                            <label htmlFor="moleIncreaseByTime">Ajan perusteella</label>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <input type="radio" name="aika" />
-                            <label htmlFor="aika">Pisteiden perusteella</label>
+                            <input 
+                                type="radio" 
+                                name="moleIncreaseByScore" 
+                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.SCORE} 
+                                onChange={() => handleMoleIncreaseStrategy(MoleIncreaseStrategies.SCORE)}
+                                />
+                            <label htmlFor="moleIncreaseByScore">Pisteiden perusteella</label>
                         </div>
                     </div>
                 </div>
 
                 {/* SET MOLE INCREASE TIME INTERVAL */}
-                <div style={InputContainer}>
+                <div style={{...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.TIME && Disabled)}}>
                     <strong>Aika intervalli milloin myyrien määrä moninkertaisuu</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="moleMultiplyIntervalTime" step={0.01} />
-                        <label htmlFor="moleMultiplyIntervalTime">ms</label>
+                        <input 
+                            style={NumberStyle} 
+                            type="number" 
+                            name="moleIncreaseByTimeInput" 
+                            step={1} 
+                            value={moleIncreaseByTimeInterval}
+                            onChange={handleMoleIncreaseByTimeInterval}
+                            />
+                        <label htmlFor="moleIncreaseByTimeInput">ms</label>
                     </div>
                 </div>
 
                 {/* SET MOLE INCREASE SCORE INTERVAL */}
-                <div style={InputContainer}>
+                <div style={{...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.SCORE && Disabled)}}>
                     <strong>Piste intervalli milloin myyrien määrä moninkertaisuu</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="moleMultiplyIntervalPoints" step={0.01} />
-                        <label htmlFor="moleMultiplyIntervalPoints">pistettä</label>
+                        <input 
+                            style={NumberStyle} 
+                            type="number" 
+                            name="moleIncreaseByScoreInput" 
+                            step={1} 
+                            value={moleIncreaseByScoreInterval}
+                            onChange={handleMoleIncreaseByScoreInterval}
+                            />
+                        <label htmlFor="moleIncreaseByScoreInput">pistettä</label>
                     </div>
                 </div>
             </section>
@@ -244,7 +283,7 @@ const InputContainer: React.CSSProperties = {
 }
 
 const NumberStyle: React.CSSProperties = {
-    width: '60px',
+    width: '100px',
     height: "30px",
     padding: "10px",
     boxSizing: "border-box",
@@ -259,4 +298,12 @@ const CheckboxStyle: React.CSSProperties = {
 }
 
 const RadioStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: "5px",
+}
+
+const Disabled: React.CSSProperties = {
+    opacity: 0.4,
+    pointerEvents: 'none',
 }

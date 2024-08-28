@@ -1,22 +1,33 @@
-import React, { useEffect, useContext, useState } from 'react'
+import React, { useEffect, useContext, useState, useRef } from 'react'
 import { randomMoleExcl } from '@/lib/utils'
 
-import { GameContext, GameStates } from '../contexts/GameContext'
+import { GameContext, GameStates, MoleIncreaseStrategies } from '../contexts/GameContext'
 
 import MoleHolePad from './MoleHolePad'
 
+
 export default function PlayArea() {
 
-  // const [timeOutHandle, setTimeOutHandle] = useState<NodeJS.Timeout | null>(null)
-  const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  const [activeMoles, setActiveMoles] = useState<number[]>([]);
-  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(1);
 
   const {
     gameState,
+    scoreNumber,
     setScoreNumber,
+    maxNumOfMoles,
+    moleIncreaseStrategy,
+    moleIncreaseByTimeInterval,
+    moleIncreaseByScoreInterval
   } = useContext(GameContext);
 
+  const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const [activeMoles, setActiveMoles] = useState<number[]>([]);
+  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState<number>(1);
+  const [nextScoreMoleIncrease, setNextScoreMoleIncrease] = useState<number>(moleIncreaseByTimeInterval)
+
+  const timeInterval = useRef<NodeJS.Timeout | null>(null)
+
+
+  // Takes care of starting and ending the game
   useEffect(() => {
     if (gameState === GameStates.STARTED) {
       newMole();
@@ -25,12 +36,14 @@ export default function PlayArea() {
     else if (gameState === GameStates.OVER || gameState === GameStates.READY) {
       // Reset initial values
       setActiveMoles([])
+      setShouldBeNumOfMoles(1)
+      setNextScoreMoleIncrease(moleIncreaseByScoreInterval)
       setScoreNumber(0)
     }
 
-  }, [gameState]);
+  }, [gameState, moleIncreaseByScoreInterval]);
 
-
+  // Takes care of spawning new moles
   useEffect(() => {
     if (gameState === GameStates.STARTED) {
 
@@ -42,10 +55,51 @@ export default function PlayArea() {
 
   }, [activeMoles]);
 
+  // Takes care of increasing number of moles BY TIME
+  useEffect(() => {
+    if (moleIncreaseStrategy === MoleIncreaseStrategies.TIME) {
+      const increaseMoles = () => {
+        timeInterval.current = setInterval(() => {
+
+          setShouldBeNumOfMoles((prev) => {
+            if (prev < maxNumOfMoles) {
+              return prev + 1
+            }
+            return prev
+          });
+
+        }, moleIncreaseByTimeInterval)
+      }
+
+      if (gameState === GameStates.STARTED) {
+        increaseMoles();
+      } else {
+        clearInterval(timeInterval.current!)
+      }
+    }
+
+  }, [gameState]);
+
+
+  // Takes care of increasing number of moles BY SCORE
+  useEffect(() => {
+    if (gameState === GameStates.STARTED) {
+
+      if (moleIncreaseStrategy === MoleIncreaseStrategies.SCORE) {
+        if (scoreNumber >= nextScoreMoleIncrease && shouldBeNumOfMoles < maxNumOfMoles) {
+          setShouldBeNumOfMoles((prev) => prev + 1)
+          setNextScoreMoleIncrease((prev) => prev + moleIncreaseByScoreInterval)
+        }
+      }
+    }
+  }, [gameState, scoreNumber]);
+
+
+  // Function to select new random moles
   const newMole = () => {
-      // Select new random moles
-      const randint = randomMoleExcl(activeMoles);
-      setActiveMoles([...activeMoles, randint])
+    // Select new random moles
+    const randint: number = randomMoleExcl(activeMoles);
+    setActiveMoles([...activeMoles, randint])
   }
 
 
