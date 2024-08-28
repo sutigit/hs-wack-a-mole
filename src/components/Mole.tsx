@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useContext } from 'react'
 import { useSpring, animated, useSpringRef } from '@react-spring/web'
+import { randomBetween } from '@/lib/utils'
 
 // Context
 import { GameContext, GameStates } from '../contexts/GameContext'
@@ -7,12 +8,22 @@ import { GameContext, GameStates } from '../contexts/GameContext'
 
 import Hammer from './Hammer'
 import HitFeedback from './HitFeedBack'
+import next from 'next'
 
-export default function Mole() {
+export default function Mole({ 
+    activeMoles,
+    setActiveMoles, 
+    moleIndex
+}: { 
+    activeMoles: number[],
+    setActiveMoles: React.Dispatch<React.SetStateAction<number[]>> 
+    moleIndex: number
+}) {
     // Context states
     const {
         scoreNumber,
         setScoreNumber,
+
         gameState,
         setGameState,
 
@@ -20,6 +31,7 @@ export default function Mole() {
         moleRiseTime,
         moleUpTime,
         moleHideTime,
+
         nextMoleMinTime,
         nextMoleMaxTime,
     } = useContext(GameContext)
@@ -50,7 +62,7 @@ export default function Mole() {
     // set initial hammer properties
     const hammerSpring = useSpring({
         ref: hammerSpringApi,
-        from: { transform: `rotate(-40deg)`, opacity: 0},
+        from: { transform: `rotate(-40deg)`, opacity: 0 },
     });
 
     // Hit feedback animation
@@ -65,20 +77,25 @@ export default function Mole() {
 
 
     // Logic and animation functions --------------------
-    const logicMoleRise = () => {
+    const logicAndAnimMoleRise = () => {
         // Animate how the mole rises from the mole pad
         // and start next animation
         moleSpringApi.start({
             to: MolePosUp,
+
+            // determines how long it takes for the mole to start rising
+            delay: randomBetween(nextMoleMinTime, nextMoleMaxTime),
+
+            // animates the mole rise duration
             config: {
                 duration: Math.floor(moleRiseTime),
             },
-            onRest: () => logicMoleRemove(),
+            onRest: () => logicAndAnimMoleRemoveOnTimeout(),
         });
     }
 
 
-    const logicMoleRemove = () => {
+    const logicAndAnimMoleRemoveOnTimeout = () => {
         // Animation and functions when mole uptime expires and it starts to hide
         moleSpringApi.start({
             to: MolePosDown,
@@ -86,7 +103,7 @@ export default function Mole() {
             // determines how long the mole stays up
             delay: Math.floor(moleUpTime),
 
-            // animates the mole hide
+            // animates the mole hide duration
             config: {
                 duration: Math.floor(moleHideTime),
             },
@@ -103,6 +120,8 @@ export default function Mole() {
                     // There is a 200ms delay to check if the mole is hit
                     // without delay, the game over trigger is unreliable
                     setTimeout(() => {
+
+                        // This asks if the mole was not hit
                         if (!isHitRef.current) {
                             // Game Over
                             setGameState(GameStates.OVER);
@@ -110,15 +129,13 @@ export default function Mole() {
                     }, 200);
                 }
 
-                // Trigger next mole
+                // Trigger next mole via AMR system
+                setActiveMoles(activeMoles.filter((moleNum) => moleNum !== moleIndex));
             },
         })
     }
-    
 
-
-    // Pure animation functions --------------------
-    const animateMoleRemoveOnHit = () => {
+    const logicAndAnimMoleRemoveOnHit = () => {
         // Separate animation for mole remove on hit
         moleSpringApi.start({
             to: MolePosDown,
@@ -126,17 +143,26 @@ export default function Mole() {
             config: {
                 duration: Math.floor(moleHideTime),
             },
+            onRest: () => {
+                // setCanHit(false);
+
+                // Trigger next mole via AMR system
+                setActiveMoles(activeMoles.filter((moleNum) => moleNum !== moleIndex));
+            }
         });
     }
 
-    const animateHammer = () => {
+
+    // Pure animation functions --------------------
+
+    const animHammer = () => {
         // Swinging animation for the hammer
         const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
         const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
         const calcPos = molePadBottom - moleTop - 20;
 
         hammerSpringApi.start({
-            from: { transform: `rotate(-40deg)`, opacity: 0, bottom: calcPos},
+            from: { transform: `rotate(-40deg)`, opacity: 0, bottom: calcPos },
             to: [
                 { transform: `rotate(-90deg)`, opacity: 1 },
                 { transform: `rotate(-80deg)`, opacity: 1 },
@@ -149,7 +175,7 @@ export default function Mole() {
         });
     }
 
-    const animateScore = () => {
+    const animScore = () => {
         // Animation for the score number that appears when the mole is hit
         const molePadBottom = molePadRef.current?.getBoundingClientRect().bottom || 0;
         const moleTop = moleRef.current?.getBoundingClientRect().top || 0;
@@ -193,9 +219,9 @@ export default function Mole() {
                 moleTypeRef.current = 'basic';
                 setMoleType('basic');
         }
-        
+
         // Start mole rise logic
-        logicMoleRise();
+        logicAndAnimMoleRise();
     }, []);
 
     useEffect(() => {
@@ -215,17 +241,15 @@ export default function Mole() {
             isHitRef.current = true;
             setCanHit(false)
 
-            
-            animateHammer();
-            
+
+            animHammer();
+
             if (moleType === 'gold' || moleType === 'basic') {
                 // Add score
                 const score = moleType === 'gold' ? 30 : 10;
                 setScoreNumber(scoreNumber + score);
-                animateScore();
-                animateMoleRemoveOnHit();
-
-                // Trigger next mole HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEEEEE!!!!
+                animScore();
+                logicAndAnimMoleRemoveOnHit();
 
             } else if (moleType === 'spike') {
                 // Game Over
@@ -240,19 +264,19 @@ export default function Mole() {
         if (moleType === 'gold') {
             return (
                 // Gold Mole
-                <animated.div ref={moleRef} style={{...moleSpring, ...MoleGold}} /> 
+                <animated.div ref={moleRef} style={{ ...moleSpring, ...MoleGold }} />
             )
-        } 
+        }
         else if (moleType === 'spike') {
             return (
                 // Spike Mole
-                <animated.div ref={moleRef} style={{...moleSpring, ...MoleSpike }}>
+                <animated.div ref={moleRef} style={{ ...moleSpring, ...MoleSpike }}>
                     {/* Made using https://svg-path.com/ */}
-                    <svg 
-                        width="100%" 
-                        height="100%" 
-                        viewBox="0 0 100 100" 
-                        preserveAspectRatio='none' 
+                    <svg
+                        width="100%"
+                        height="100%"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio='none'
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill="#000000" d="
                             M 0 0 
@@ -267,11 +291,11 @@ export default function Mole() {
                     </svg>
                 </animated.div>
             )
-        } 
-        else if ( moleType === 'basic') {
+        }
+        else if (moleType === 'basic') {
             return (
                 // Basic Mole
-                <animated.div ref={moleRef} style={{...moleSpring, ...MoleBasic}} />
+                <animated.div ref={moleRef} style={{ ...moleSpring, ...MoleBasic }} />
             )
         }
     }

@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react'
+import { randomBetween, randomMoleExcl } from '@/lib/utils'
 
 import { GameContext, GameStates } from '../contexts/GameContext'
 
@@ -7,53 +8,65 @@ import MoleHolePad from './MoleHolePad'
 export default function PlayArea() {
 
   // const [timeOutHandle, setTimeOutHandle] = useState<NodeJS.Timeout | null>(null)
-  const [activeMoles, setActiveMoles] = useState<number[] | null>(null)
+  const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const [activeMoles, setActiveMoles] = useState<number[]>([]);
+  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(1);
 
   const {
     gameState,
     setScoreNumber,
-  } = useContext(GameContext)
+    nextMoleMinTime,
+    nextMoleMaxTime,
+  } = useContext(GameContext);
 
   useEffect(() => {
     if (gameState === GameStates.STARTED) {
       // 1000ms delay to start spawning moles
-      setTimeout(() => {
-        nextMole()
-      }, 1000)
+      newMole(1000);
     }
 
     else if (gameState === GameStates.OVER || gameState === GameStates.READY) {
       // Reset initial values
-      setActiveMoles(null)
+      setActiveMoles([])
       setScoreNumber(0)
     }
 
-  }, [gameState])
+  }, [gameState]);
 
 
-  const nextMole = () => {
+  useEffect(() => {
+    if (gameState === GameStates.STARTED) {
+      console.log('Active moles:', activeMoles)
 
-    // Select new random mole ------------
-    // generate random number 0-8
-    const randint1 = Math.floor(Math.random() * 9)
-    // const randint2 = Math.floor(Math.random() * 9)
-    // Set the new mole
-    setActiveMoles([randint1])
+      // check if number of active moles is less than what it should be, if so, spawn a new mole
+      if (activeMoles && activeMoles?.length < shouldBeNumOfMoles) {
+        const newtime = randomBetween(nextMoleMinTime, nextMoleMaxTime)
+        newMole(newtime);
+      }
+    }
+
+  }, [activeMoles]);
+
+  const newMole = (time: number) => {
+      // Select new random moles
+      const randint = randomMoleExcl(activeMoles);
+      setActiveMoles([...activeMoles, randint])
   }
 
 
   return (
     <div style={Container}>
       <section style={GridContainer}>
-        <MoleHolePad selected={!!activeMoles?.includes(0)} />
-        <MoleHolePad selected={!!activeMoles?.includes(1)} />
-        <MoleHolePad selected={!!activeMoles?.includes(2)} />
-        <MoleHolePad selected={!!activeMoles?.includes(3)} />
-        <MoleHolePad selected={!!activeMoles?.includes(4)} />
-        <MoleHolePad selected={!!activeMoles?.includes(5)} />
-        <MoleHolePad selected={!!activeMoles?.includes(6)} />
-        <MoleHolePad selected={!!activeMoles?.includes(7)} />
-        <MoleHolePad selected={!!activeMoles?.includes(8)} />
+        {
+          moleOptions.map((moleIndex) => (
+            <MoleHolePad
+              key={moleIndex}
+              selected={!!activeMoles?.includes(moleIndex)}
+              activeMoles={activeMoles}
+              setActiveMoles={setActiveMoles}
+              moleIndex={moleIndex}
+            />
+          ))}
       </section>
     </div>
   )

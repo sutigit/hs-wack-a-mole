@@ -2,17 +2,33 @@ import React from 'react'
 
 import Mole from './Mole'
 
-export default function MoleHole({selected}: {selected: boolean}) {
+export default function MoleHole({
+    selected,
+    activeMoles,
+    setActiveMoles,
+    moleIndex
+}: {
+    selected: boolean,
+    activeMoles: number[],
+    setActiveMoles: React.Dispatch<React.SetStateAction<number[]>>
+    moleIndex: number
+}) {
 
-  return (
-    <div style={Container}>
-        <div style={MoleHolePad}>
-            <div style={Hole}></div>
-            { selected && <Mole /> } 
+    return (
+        <div style={Container}>
+            <div style={MoleHolePad}>
+                <div style={Hole}></div>
+                {selected &&
+                    <Mole
+                        activeMoles={activeMoles}
+                        setActiveMoles={setActiveMoles}
+                        moleIndex={moleIndex}
+                    />
+                }
+            </div>
         </div>
-    </div>
-  )
-} 
+    )
+}
 
 const Container: React.CSSProperties = {
     boxSizing: 'border-box',

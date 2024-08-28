@@ -23,6 +23,13 @@ interface GameContextProps {
 
     nextMoleMaxTime: number;
     setNextMoleMaxTime: React.Dispatch<React.SetStateAction<number>>;
+
+    // Muliple moles system
+    maxNumOfMoles: number;
+    setMaxNumOfMoles: React.Dispatch<React.SetStateAction<number>>;
+
+    shouldBeNumOfMoles: number;
+    setShouldBeNumOfMoles: React.Dispatch<React.SetStateAction<number>>;
 }
 
 enum GameStates {
@@ -55,6 +62,13 @@ const defaultValue = {
 
     nextMoleMaxTime: 3000,
     setNextMoleMaxTime: () => {},
+
+    // Multiple moles system
+    maxNumOfMoles: 1,
+    setMaxNumOfMoles: () => {},
+
+    shouldBeNumOfMoles: 1,
+    setShouldBeNumOfMoles: () => {},
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
@@ -79,6 +93,10 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
     const [nextMoleMinTime, setNextMoleMinTime] = useState(2000);
     const [nextMoleMaxTime, setNextMoleMaxTime] = useState(3000);
+
+    // Multiple moles system
+    const [maxNumOfMoles, setMaxNumOfMoles] = useState(1);
+    const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState(1);
 
     const value = {
         // game states
@@ -105,6 +123,14 @@ const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
         nextMoleMaxTime,
         setNextMoleMaxTime,
+
+        // Multiple moles system
+        maxNumOfMoles,
+        setMaxNumOfMoles,
+
+        shouldBeNumOfMoles,
+        setShouldBeNumOfMoles,
+        
     }
 
     return (
