@@ -14,6 +14,8 @@ export default function PlayArea() {
     scoreNumber,
     setScoreNumber,
     maxNumOfMoles,
+    currentNumOfMoles,
+    setCurrentNumOfMoles,
     moleIncreaseStrategy,
     moleIncreaseByTimeInterval,
     moleIncreaseByScoreInterval
@@ -21,7 +23,6 @@ export default function PlayArea() {
 
   const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   const [activeMoles, setActiveMoles] = useState<number[]>([]);
-  const [shouldBeNumOfMoles, setShouldBeNumOfMoles] = useState<number>(1);
   const [nextScoreMoleIncrease, setNextScoreMoleIncrease] = useState<number>(moleIncreaseByTimeInterval)
 
   const timeInterval = useRef<NodeJS.Timeout | null>(null)
@@ -36,7 +37,7 @@ export default function PlayArea() {
     else if (gameState === GameStates.OVER || gameState === GameStates.READY) {
       // Reset initial values
       setActiveMoles([])
-      setShouldBeNumOfMoles(1)
+      setCurrentNumOfMoles(1)
       setNextScoreMoleIncrease(moleIncreaseByScoreInterval)
       setScoreNumber(0)
     }
@@ -48,7 +49,7 @@ export default function PlayArea() {
     if (gameState === GameStates.STARTED) {
 
       // check if number of active moles is less than what it should be, if so, spawn a new mole
-      if (activeMoles && activeMoles?.length < shouldBeNumOfMoles) {
+      if (activeMoles && activeMoles?.length < currentNumOfMoles) {
         newMole();
       }
     }
@@ -60,8 +61,8 @@ export default function PlayArea() {
     if (moleIncreaseStrategy === MoleIncreaseStrategies.TIME) {
       const increaseMoles = () => {
         timeInterval.current = setInterval(() => {
-
-          setShouldBeNumOfMoles((prev) => {
+          console.log('increasing moles')
+          setCurrentNumOfMoles((prev) => {
             if (prev < maxNumOfMoles) {
               return prev + 1
             }
@@ -86,8 +87,8 @@ export default function PlayArea() {
     if (gameState === GameStates.STARTED) {
 
       if (moleIncreaseStrategy === MoleIncreaseStrategies.SCORE) {
-        if (scoreNumber >= nextScoreMoleIncrease && shouldBeNumOfMoles < maxNumOfMoles) {
-          setShouldBeNumOfMoles((prev) => prev + 1)
+        if (scoreNumber >= nextScoreMoleIncrease && currentNumOfMoles < maxNumOfMoles) {
+          setCurrentNumOfMoles((prev) => prev + 1)
           setNextScoreMoleIncrease((prev) => prev + moleIncreaseByScoreInterval)
         }
       }

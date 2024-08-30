@@ -192,7 +192,7 @@ export default function Page() {
 
                 {/* SET MOLE INCREASE STRATEGY */}
                 <div style={InputContainer}>
-                    <strong>Tapa minkä perusteella myyrät alkaa nousta samanaikaisesti</strong>
+                    <strong>Tapa minkä perusteella lisätään samanaikaisten myyrien määrä</strong>
                     <div style={RadioStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <input 
