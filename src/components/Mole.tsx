@@ -5,10 +5,8 @@ import { randomBetween } from '@/lib/utils'
 // Context
 import { GameContext, GameStates } from '../contexts/GameContext'
 
-
 import Hammer from './Hammer'
 import HitFeedback from './HitFeedBack'
-import next from 'next'
 
 export default function Mole({ 
     activeMoles,
@@ -21,24 +19,33 @@ export default function Mole({
 }) {
     // Context states
     const {
+        // GAME STATES
         scoreNumber,
         setScoreNumber,
-
         gameState,
         setGameState,
 
-        // NEW SPAWN SYSTEM
+        // MOLE BEHAVIOUR TIMINGS
         moleRiseTime,
         moleUpTime,
         moleHideTime,
-
         nextMoleMinTime,
         nextMoleMaxTime,
+
+        // MOLE ACCELERATION
+        avgMoleLifeTimeMultiplier,
     } = useContext(GameContext)
 
     // States
     const [moleType, setMoleType] = useState<string>('basic')
     const [canHit, setCanHit] = useState<boolean>(true)
+
+    // Local mole behaviour timings
+    const localMoleRiseTime = moleRiseTime * avgMoleLifeTimeMultiplier
+    const localMoleUpTime = moleUpTime * avgMoleLifeTimeMultiplier
+    const localMoleHideTime = moleHideTime * avgMoleLifeTimeMultiplier
+    const localNextMoleMinTime = nextMoleMinTime * avgMoleLifeTimeMultiplier
+    const localNextMoleMaxTime = nextMoleMaxTime * avgMoleLifeTimeMultiplier
 
     // Refs
     const moleRef = useRef<HTMLDivElement>(null);
@@ -84,11 +91,11 @@ export default function Mole({
             to: MolePosUp,
 
             // determines how long it takes for the mole to START rising
-            delay: randomBetween(nextMoleMinTime, nextMoleMaxTime),
+            delay: randomBetween(localNextMoleMinTime, localNextMoleMaxTime),
 
             // determines how long it takes for the mole to rise
             config: {
-                duration: Math.floor(moleRiseTime),
+                duration: Math.floor(localMoleRiseTime),
             },
             onRest: () => logicAndAnimMoleRemoveOnTimeout(),
         });
@@ -101,11 +108,11 @@ export default function Mole({
             to: MolePosDown,
 
             // determines how long the mole stays up
-            delay: Math.floor(moleUpTime),
+            delay: Math.floor(localMoleUpTime),
 
             // determines how long it takes for the mole to hide
             config: {
-                duration: Math.floor(moleHideTime),
+                duration: Math.floor(localMoleHideTime),
             },
 
             // this logic starts when the mole is hidden
@@ -142,7 +149,7 @@ export default function Mole({
             to: MolePosDown,
             delay: 100,
             config: {
-                duration: Math.floor(moleHideTime),
+                duration: Math.floor(localMoleHideTime),
             },
             onRest: () => {
                 // Trigger next mole via AMR system
@@ -194,13 +201,12 @@ export default function Mole({
     }
 
     useEffect(() => {
+
         // Check if refs are not null
         if (!moleRef.current || !molePadRef.current || !hammerRef.current) return;
 
         // Randomize mole type --------------------
         const rand = Math.random();
-
-        // TODO: migrate to probability ratios to global settings
         switch (true) {
             case rand <= 0.2:
                 // The refs are for controlling the game in animations
@@ -218,7 +224,8 @@ export default function Mole({
                 setMoleType('basic');
         }
 
-        // Start mole rise logic
+
+        // Start mole activation logic
         logicAndAnimMoleRise();
     }, []);
 

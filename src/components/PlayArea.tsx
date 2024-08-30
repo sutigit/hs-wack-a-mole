@@ -12,20 +12,27 @@ export default function PlayArea() {
   const {
     gameState,
     scoreNumber,
+    gameSpeedRef,
+    setGameSpeedMeter,
+    setAvgMoleLifeTimeMultiplier,
     setScoreNumber,
     maxNumOfMoles,
     currentNumOfMoles,
     setCurrentNumOfMoles,
     moleIncreaseStrategy,
     moleIncreaseByTimeInterval,
-    moleIncreaseByScoreInterval
+    moleIncreaseByScoreInterval,
+    avgMoleLifeTimeReducer,
+    hasSpeedCap,
+    gameSpeedCap,
   } = useContext(GameContext);
 
   const moleOptions = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   const [activeMoles, setActiveMoles] = useState<number[]>([]);
   const [nextScoreMoleIncrease, setNextScoreMoleIncrease] = useState<number>(moleIncreaseByTimeInterval)
 
-  const timeInterval = useRef<NodeJS.Timeout | null>(null)
+  const moleIncreaseInterval = useRef<NodeJS.Timeout | null>(null)
+  const gameAccelerateInterval = useRef<NodeJS.Timeout | null>(null)
 
 
   // Takes care of starting and ending the game
@@ -35,11 +42,13 @@ export default function PlayArea() {
     }
 
     else if (gameState === GameStates.OVER || gameState === GameStates.READY) {
+      // TODO: automate this
       // Reset initial values
       setActiveMoles([])
       setCurrentNumOfMoles(1)
       setNextScoreMoleIncrease(moleIncreaseByScoreInterval)
       setScoreNumber(0)
+      setAvgMoleLifeTimeMultiplier(1)
     }
 
   }, [gameState, moleIncreaseByScoreInterval]);
@@ -58,42 +67,62 @@ export default function PlayArea() {
 
   // Takes care of increasing number of moles BY TIME
   useEffect(() => {
-    if (moleIncreaseStrategy === MoleIncreaseStrategies.TIME) {
-      const increaseMoles = () => {
-        timeInterval.current = setInterval(() => {
-          console.log('increasing moles')
-          setCurrentNumOfMoles((prev) => {
-            if (prev < maxNumOfMoles) {
-              return prev + 1
-            }
-            return prev
-          });
+    if (gameState === GameStates.STARTED && moleIncreaseStrategy === MoleIncreaseStrategies.TIME) {
+      moleIncreaseInterval.current = setInterval(() => {
+        setCurrentNumOfMoles((prev) => {
+          if (prev < maxNumOfMoles) {
+            return prev + 1
+          }
+          return prev
+        });
 
-        }, moleIncreaseByTimeInterval)
-      }
-
-      if (gameState === GameStates.STARTED) {
-        increaseMoles();
-      } else {
-        clearInterval(timeInterval.current!)
-      }
+      }, moleIncreaseByTimeInterval)
+    } else {
+      clearInterval(moleIncreaseInterval.current!)
     }
 
+    // Keep only gameState dependency when doing time intervals
   }, [gameState]);
 
 
   // Takes care of increasing number of moles BY SCORE
   useEffect(() => {
-    if (gameState === GameStates.STARTED) {
+    if (gameState === GameStates.STARTED && moleIncreaseStrategy === MoleIncreaseStrategies.SCORE) {
+      if (scoreNumber >= nextScoreMoleIncrease) {
+        setCurrentNumOfMoles((prev) => {
+          if (prev < maxNumOfMoles) {
+            return prev + 1
+          }
+          return prev
+        });
 
-      if (moleIncreaseStrategy === MoleIncreaseStrategies.SCORE) {
-        if (scoreNumber >= nextScoreMoleIncrease && currentNumOfMoles < maxNumOfMoles) {
-          setCurrentNumOfMoles((prev) => prev + 1)
-          setNextScoreMoleIncrease((prev) => prev + moleIncreaseByScoreInterval)
-        }
+        setNextScoreMoleIncrease((prev) => prev + moleIncreaseByScoreInterval)
       }
     }
   }, [gameState, scoreNumber]);
+
+
+  // Takes care of accelerating the game
+  useEffect(() => {
+    if (gameState === GameStates.STARTED) {
+      gameAccelerateInterval.current = setInterval(() => {
+        setAvgMoleLifeTimeMultiplier((prevMultiplier) => {          
+          const newMultiplier = prevMultiplier - (avgMoleLifeTimeReducer / 100)
+          const speedCap = hasSpeedCap ? gameSpeedCap : Infinity;
+          if (gameSpeedRef.current < speedCap && newMultiplier > 0) {
+            return newMultiplier;
+          }
+          return prevMultiplier
+        });
+        setGameSpeedMeter(gameSpeedRef.current)
+      }, 2000)
+
+    } else {
+      clearInterval(gameAccelerateInterval.current!)
+    }
+
+    // Keep only gameState dependency when doing time intervals
+  }, [gameState]);
 
 
   // Function to select new random moles

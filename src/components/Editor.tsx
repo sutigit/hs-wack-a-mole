@@ -5,11 +5,14 @@ import { useState, useContext } from 'react';
 import { GameContext, GameStates, MoleIncreaseStrategies } from '../contexts/GameContext'
 
 export default function Page() {
-    const [acceleration, setAcceleration] = useState(30);
 
-    // Context states
+    // GAME CONTEXT VALUES
     const {
+        // GAME STATES
         setGameState,
+
+        // GAME SPEED
+        gameSpeedMeter,
 
         // MOLE BEHAVIOUR TIMINGS
         moleRiseTime,
@@ -41,6 +44,14 @@ export default function Page() {
         setMoleIncreaseByScoreInterval,
 
         // MOLE ACCELERATION
+        avgMoleLifeTimeReducer,
+        setAvgMoleLifeTimeReducer,
+
+        hasSpeedCap,
+        setHasSpeedCap,
+
+        gameSpeedCap,
+        setGameSpeedCap,
     } = useContext(GameContext)
 
 
@@ -94,7 +105,17 @@ export default function Page() {
     // MOLE ACCELERATION
     const handleAcceleration = (e: any) => {
         setGameState(GameStates.READY);
-        setAcceleration(Number(e.target.value));
+        setAvgMoleLifeTimeReducer(Number(e.target.value));
+    }
+
+    const handleHasSpeedCap = (e: any) => {
+        setGameState(GameStates.READY);
+        setHasSpeedCap(e.target.checked);
+    }
+
+    const handleSpeedCap = (e: any) => {
+        setGameState(GameStates.READY);
+        setGameSpeedCap(Number(e.target.value));
     }
 
     return (
@@ -135,11 +156,28 @@ export default function Page() {
                 <div style={InputContainer}>
                     <strong>Kuinka nopeasti seuraava myyrä nousee</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="nextMoleSpeedMin" step={1} defaultValue={nextMoleMinTime} onChange={handleNextMoleMinTime} />
+                        <input 
+                            style={NumberStyle} 
+                            type="number" 
+                            name="nextMoleSpeedMin"
+                            min={0} 
+                            max={nextMoleMaxTime-1}
+                            step={1} 
+                            defaultValue={nextMoleMinTime} 
+                            onChange={handleNextMoleMinTime} 
+                            />
                         <label htmlFor="nextMoleSpeedMin">min ms</label>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="nextMoleSpeedMax" step={1} defaultValue={nextMoleMaxTime} onChange={handleNextMoleMaxTime} />
+                        <input 
+                            style={NumberStyle} 
+                            type="number" 
+                            name="nextMoleSpeedMax" 
+                            min={nextMoleMinTime}
+                            step={1} 
+                            defaultValue={nextMoleMaxTime} 
+                            onChange={handleNextMoleMaxTime} 
+                            />
                         <label htmlFor="nextMoleSpeedMax">max ms</label>
                     </div>
                 </div>
@@ -151,28 +189,59 @@ export default function Page() {
             <section style={SectionContainer}>
                 <h2>Pelin kiihtyminen</h2>
 
+                <div style={InputContainer}>
+                    <strong>Pelin nopeus nyt:</strong>
+                    <div style={{display: 'flex', gap: 5, alignItems: 'center'}}>
+                        <strong style={{ fontSize: '1.1rem', borderRadius: '50px', alignSelf: 'flex-start', padding: '8px 16px', color: 'white', backgroundColor: '#ff0055ff' }}>
+                            {gameSpeedMeter}
+                        </strong>
+                        <p>Juhanaa</p>
+                    </div>
+                </div>
+
                 {/* MOLE ACCELERATION MULTIPLIER */}
                 <div style={InputContainer}>
-                    <strong>kuinka nopeasti peli kiihtyy (over-time-kerroin, 1:ssä peli ei kiihdy)</strong>
-                    <input style={SliderStyle} type="range" step={1} min={1} max={100} value={acceleration} onChange={handleAcceleration} />
-                    <span>Kerroin: {acceleration}</span>
+                    <strong>kuinka nopeasti peli kiihtyy (0 ei kiihdytä peliä)</strong>
+                    <input
+                        style={SliderStyle}
+                        type="range"
+                        step={0.1}
+                        min={0}
+                        max={20}
+                        value={avgMoleLifeTimeReducer}
+                        onChange={handleAcceleration}
+                    />
+                    <span>Kerroin: {avgMoleLifeTimeReducer}</span>
                 </div>
 
                 {/* MOLE ACCELERATION STRATEGY */}
                 <div style={InputContainer}>
-                    <strong>Onko kiihtymisen ylärajaa?</strong>
+                    <strong>Onko pelin nopeus ylärajaa?</strong>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                        <input style={CheckboxStyle} type="checkbox" name="hasMaxAcceleration" />
+                        <input
+                            style={CheckboxStyle}
+                            type="checkbox"
+                            name="hasMaxAcceleration"
+                            checked={hasSpeedCap}
+                            onChange={handleHasSpeedCap}
+                        />
                         <label htmlFor='hasMaxAcceleration'>On</label>
                     </div>
                 </div>
 
                 {/* MOLE ACCELERATION CAP */}
-                <div style={InputContainer}>
-                    <strong>Kiihtymisen yläraja</strong>
+                <div style={{ ...InputContainer, ...(!hasSpeedCap && Disabled) }}>
+                    <strong>Pelin nopeuden yläraja</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="accelerationCap" step={0.01} />
-                        <label htmlFor="accelerationCap">myyrää / minuutti</label>
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="gameSpeedCap"
+                            step={0.1}
+                            value={gameSpeedCap}
+                            onChange={handleSpeedCap}
+                        />
+                        <label htmlFor="gameSpeedCap">Juhanaa</label>
                     </div>
                 </div>
             </section>
@@ -195,54 +264,54 @@ export default function Page() {
                     <strong>Tapa minkä perusteella lisätään samanaikaisten myyrien määrä</strong>
                     <div style={RadioStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <input 
-                                type="radio" 
-                                name="moleIncreaseByTime" 
-                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.TIME} 
+                            <input
+                                type="radio"
+                                name="moleIncreaseByTime"
+                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.TIME}
                                 onChange={() => handleMoleIncreaseStrategy(MoleIncreaseStrategies.TIME)}
-                                />
+                            />
                             <label htmlFor="moleIncreaseByTime">Ajan perusteella</label>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <input 
-                                type="radio" 
-                                name="moleIncreaseByScore" 
-                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.SCORE} 
+                            <input
+                                type="radio"
+                                name="moleIncreaseByScore"
+                                checked={moleIncreaseStrategy == MoleIncreaseStrategies.SCORE}
                                 onChange={() => handleMoleIncreaseStrategy(MoleIncreaseStrategies.SCORE)}
-                                />
+                            />
                             <label htmlFor="moleIncreaseByScore">Pisteiden perusteella</label>
                         </div>
                     </div>
                 </div>
 
                 {/* SET MOLE INCREASE TIME INTERVAL */}
-                <div style={{...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.TIME && Disabled)}}>
-                    <strong>Aika intervalli milloin myyrien määrä moninkertaisuu</strong>
+                <div style={{ ...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.TIME && Disabled) }}>
+                    <strong>Aika intervalli milloin myyrien määrä moninkertaistuu</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input 
-                            style={NumberStyle} 
-                            type="number" 
-                            name="moleIncreaseByTimeInput" 
-                            step={1} 
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="moleIncreaseByTimeInput"
+                            step={1}
                             value={moleIncreaseByTimeInterval}
                             onChange={handleMoleIncreaseByTimeInterval}
-                            />
+                        />
                         <label htmlFor="moleIncreaseByTimeInput">ms</label>
                     </div>
                 </div>
 
                 {/* SET MOLE INCREASE SCORE INTERVAL */}
-                <div style={{...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.SCORE && Disabled)}}>
+                <div style={{ ...InputContainer, ...(moleIncreaseStrategy != MoleIncreaseStrategies.SCORE && Disabled) }}>
                     <strong>Piste intervalli milloin myyrien määrä moninkertaisuu</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input 
-                            style={NumberStyle} 
-                            type="number" 
-                            name="moleIncreaseByScoreInput" 
-                            step={1} 
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="moleIncreaseByScoreInput"
+                            step={1}
                             value={moleIncreaseByScoreInterval}
                             onChange={handleMoleIncreaseByScoreInterval}
-                            />
+                        />
                         <label htmlFor="moleIncreaseByScoreInput">pistettä</label>
                     </div>
                 </div>

@@ -1,11 +1,21 @@
-import React, { createContext, useState, ReactNode, useRef } from "react";
+import React, { createContext, useState, ReactNode, useRef, useEffect } from "react";
 
 interface GameContextProps {
+
+    // GAME STATES
     gameState: GameStates;
     setGameState: React.Dispatch<React.SetStateAction<GameStates>>;
 
     scoreNumber: number;
     setScoreNumber: React.Dispatch<React.SetStateAction<number>>;
+
+    gameSpeedRef: any;
+
+    gameSpeedMeter: number;
+    setGameSpeedMeter: React.Dispatch<React.SetStateAction<number>>;
+
+    avgMoleLifeTimeMultiplier: number;
+    setAvgMoleLifeTimeMultiplier: React.Dispatch<React.SetStateAction<number>>;
 
 
     // MOLE BEHAVIOUR TIMINGS
@@ -39,6 +49,17 @@ interface GameContextProps {
 
     moleIncreaseByScoreInterval: number;
     setMoleIncreaseByScoreInterval: React.Dispatch<React.SetStateAction<number>>;
+
+    // MOLE SPAWN ACCELERATION
+    avgMoleLifeTimeReducer: number;
+    setAvgMoleLifeTimeReducer: React.Dispatch<React.SetStateAction<number>>;
+
+    hasSpeedCap: boolean;
+    setHasSpeedCap: React.Dispatch<React.SetStateAction<boolean>>;
+
+    gameSpeedCap: number;
+    setGameSpeedCap: React.Dispatch<React.SetStateAction<number>>;
+
 }
 
 enum GameStates {
@@ -54,54 +75,65 @@ enum MoleIncreaseStrategies {
 
 const defaultValue = {
     gameState: GameStates.READY,
-    setGameState: () => {},
+    setGameState: () => { },
 
     scoreNumber: 0,
-    setScoreNumber: () => {},
+    setScoreNumber: () => { },
 
+    gameSpeedRef: 0,
+
+    gameSpeedMeter: 0,
+    setGameSpeedMeter: () => { },
 
     // MOLE BEHAVIOUR TIMINGS
     moleRiseTime: 400,
-    setMoleRiseTime: () => {},
+    setMoleRiseTime: () => { },
 
     moleUpTime: 1200,
-    setMoleUpTime: () => {},
+    setMoleUpTime: () => { },
 
     moleHideTime: 400,
-    setMoleHideTime: () => {},
+    setMoleHideTime: () => { },
 
     nextMoleMinTime: 2000,
-    setNextMoleMinTime: () => {},
+    setNextMoleMinTime: () => { },
 
     nextMoleMaxTime: 3000,
-    setNextMoleMaxTime: () => {},
+    setNextMoleMaxTime: () => { },
 
     // MOLE COUNT INCREASE
     maxNumOfMoles: 3,
-    setMaxNumOfMoles: () => {},
+    setMaxNumOfMoles: () => { },
 
     currentNumOfMoles: 1,
-    setCurrentNumOfMoles: () => {},
+    setCurrentNumOfMoles: () => { },
 
     moleIncreaseStrategy: MoleIncreaseStrategies.TIME, // TIME or SCORE
-    setMoleIncreaseStrategy: () => {},
+    setMoleIncreaseStrategy: () => { },
 
     moleIncreaseByTimeInterval: 30000, // 30 seconds
-    setMoleIncreaseByTimeInterval: () => {},
+    setMoleIncreaseByTimeInterval: () => { },
 
     moleIncreaseByScoreInterval: 300, // 300 points
-    setMoleIncreaseByScoreInterval: () => {},
+    setMoleIncreaseByScoreInterval: () => { },
+
+    // MOLE SPAWN ACCELERATION
+    avgMoleLifeTimeReducer: 1,
+    setAvgMoleLifeTimeReducer: () => { },
+
+    avgMoleLifeTimeMultiplier: 1,
+    setAvgMoleLifeTimeMultiplier: () => { },
+
+    hasSpeedCap: false,
+    setHasSpeedCap: () => { },
+
+    gameSpeedCap: 50,
+    setGameSpeedCap: () => { },
 };
 
 const GameContext = createContext<GameContextProps>(defaultValue);
 
-const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-
-
-    
-    const [gameState, setGameState] = useState<GameStates>(defaultValue.gameState);
-
-    const [scoreNumber, setScoreNumber] = useState<number>(defaultValue.scoreNumber);
+const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 
     // MOLE BEHAVIOUR TIMINGS
@@ -113,11 +145,46 @@ const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const [nextMoleMaxTime, setNextMoleMaxTime] = useState<number>(defaultValue.nextMoleMaxTime);
 
     // MOLE COUNT INCREASE
-    const [maxNumOfMoles, setMaxNumOfMoles] = useState<number>(3);
-    const [currentNumOfMoles, setCurrentNumOfMoles] = useState<number>(1);
+    const [maxNumOfMoles, setMaxNumOfMoles] = useState<number>(defaultValue.maxNumOfMoles);
+    const [currentNumOfMoles, setCurrentNumOfMoles] = useState<number>(defaultValue.currentNumOfMoles);
     const [moleIncreaseStrategy, setMoleIncreaseStrategy] = useState<MoleIncreaseStrategies>(defaultValue.moleIncreaseStrategy);
     const [moleIncreaseByTimeInterval, setMoleIncreaseByTimeInterval] = useState<number>(defaultValue.moleIncreaseByTimeInterval);
     const [moleIncreaseByScoreInterval, setMoleIncreaseByScoreInterval] = useState<number>(defaultValue.moleIncreaseByScoreInterval);
+
+    // MOLE SPAWN ACCELERATION
+    const [hasSpeedCap, setHasSpeedCap] = useState<boolean>(defaultValue.hasSpeedCap);
+    const [gameSpeedCap, setGameSpeedCap] = useState<number>(defaultValue.gameSpeedCap);
+    
+    
+    // GAME CONTEXT VALUES
+    const [gameState, setGameState] = useState<GameStates>(defaultValue.gameState);
+    const [scoreNumber, setScoreNumber] = useState<number>(defaultValue.scoreNumber);
+    
+    // GAME SPEED
+    const oneMinute = 60000; // ms
+    const [gameSpeedMeter, setGameSpeedMeter] = useState<number>(defaultValue.gameSpeedMeter);
+    const [avgMoleLifeTimeReducer, setAvgMoleLifeTimeReducer] = useState<number>(defaultValue.avgMoleLifeTimeReducer);
+    const [avgMoleLifeTimeMultiplier, setAvgMoleLifeTimeMultiplier] = useState<number>(defaultValue.avgMoleLifeTimeMultiplier);
+
+    // Calculate initial game speed
+    const gameSpeedRef = useRef<number>(defaultValue.gameSpeedRef);
+
+    // Continuously calculate game speed
+    useEffect(() => {
+        const avgMoleLifeTime = moleRiseTime + moleUpTime + moleHideTime + nextMoleMinTime + ((nextMoleMaxTime - nextMoleMinTime) / 2);
+        gameSpeedRef.current = parseFloat((oneMinute / (avgMoleLifeTime * avgMoleLifeTimeMultiplier)).toFixed(2));
+        setGameSpeedMeter(gameSpeedRef.current);
+    }, [
+        moleRiseTime,
+        moleUpTime,
+        moleHideTime,
+        nextMoleMinTime,
+        nextMoleMaxTime,
+        currentNumOfMoles,
+        avgMoleLifeTimeReducer,
+        avgMoleLifeTimeMultiplier,
+    ]);
+
 
     const value = {
         // game states
@@ -127,7 +194,15 @@ const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         // game score
         scoreNumber,
         setScoreNumber,
-        
+
+        // game speed
+        gameSpeedRef,
+
+        gameSpeedMeter,
+        setGameSpeedMeter,
+
+        avgMoleLifeTimeMultiplier,
+        setAvgMoleLifeTimeMultiplier,
 
         // MOLE BEHAVIOUR TIMINGS
         moleRiseTime,
@@ -160,6 +235,16 @@ const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
         moleIncreaseByScoreInterval,
         setMoleIncreaseByScoreInterval,
+
+        // MOLE SPAWN ACCELERATION
+        avgMoleLifeTimeReducer,
+        setAvgMoleLifeTimeReducer,
+
+        hasSpeedCap,
+        setHasSpeedCap,
+
+        gameSpeedCap,
+        setGameSpeedCap,
     }
 
     return (
@@ -169,4 +254,4 @@ const GameProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     );
 };
 
-export { GameProvider, GameContext,  GameStates, MoleIncreaseStrategies};
+export { GameProvider, GameContext, GameStates, MoleIncreaseStrategies };
