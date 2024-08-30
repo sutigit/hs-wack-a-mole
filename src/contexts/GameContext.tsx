@@ -59,7 +59,6 @@ interface GameContextProps {
 
     gameSpeedCap: number;
     setGameSpeedCap: React.Dispatch<React.SetStateAction<number>>;
-
 }
 
 enum GameStates {
@@ -73,7 +72,7 @@ enum MoleIncreaseStrategies {
     SCORE = "SCORE",
 }
 
-const defaultValue = {
+export const defaultValue = {
     gameState: GameStates.READY,
     setGameState: () => { },
 

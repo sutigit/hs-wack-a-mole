@@ -1,8 +1,8 @@
 'use client';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 
 // Context
-import { GameContext, GameStates, MoleIncreaseStrategies } from '../contexts/GameContext'
+import { GameContext, GameStates, MoleIncreaseStrategies, defaultValue } from '../contexts/GameContext'
 
 export default function Page() {
 
@@ -54,72 +54,121 @@ export default function Page() {
         setGameSpeedCap,
     } = useContext(GameContext)
 
+    const resetEverything = () => {
+        setGameState(GameStates.READY);
+        setMoleRiseTime(defaultValue.moleRiseTime);
+        setMoleUpTime(defaultValue.moleUpTime);
+        setMoleHideTime(defaultValue.moleHideTime);
+        setNextMoleMinTime(defaultValue.nextMoleMinTime);
+        setNextMoleMaxTime(defaultValue.nextMoleMaxTime);
+        setMaxNumOfMoles(defaultValue.maxNumOfMoles);
+        setMoleIncreaseStrategy(defaultValue.moleIncreaseStrategy);
+        setMoleIncreaseByTimeInterval(defaultValue.moleIncreaseByTimeInterval);
+        setMoleIncreaseByScoreInterval(defaultValue.moleIncreaseByScoreInterval);
+        setAvgMoleLifeTimeReducer(defaultValue.avgMoleLifeTimeReducer);
+        setHasSpeedCap(defaultValue.hasSpeedCap);
+        setGameSpeedCap(defaultValue.gameSpeedCap);
+
+        // reset local storage
+        localStorage.clear();
+    }
 
     // MOLE BEHAVIOUR TIMINGS
     const handleMoleRiseTime = (e: any) => {
         setGameState(GameStates.READY);
         setMoleRiseTime(Number(e.target.value));
+        localStorage.setItem('moleRiseTime', e.target.value);
     }
 
     const handleMoleUpTime = (e: any) => {
         setGameState(GameStates.READY);
         setMoleUpTime(Number(e.target.value));
+        localStorage.setItem('moleUpTime', e.target.value);
     }
 
     const handleMoleHideTime = (e: any) => {
         setGameState(GameStates.READY);
         setMoleHideTime(Number(e.target.value));
+        localStorage.setItem('moleHideTime', e.target.value);
     }
 
     const handleNextMoleMinTime = (e: any) => {
         setGameState(GameStates.READY);
         setNextMoleMinTime(Number(e.target.value));
+        localStorage.setItem('nextMoleMinTime', e.target.value);
     }
 
     const handleNextMoleMaxTime = (e: any) => {
         setGameState(GameStates.READY);
         setNextMoleMaxTime(Number(e.target.value));
+        localStorage.setItem('nextMoleMaxTime', e.target.value);
     }
 
     // MOLE COUNT INCREASE
     const handleMoleCount = (e: any) => {
         setGameState(GameStates.READY);
         setMaxNumOfMoles(Number(e.target.value));
+        localStorage.setItem('maxNumOfMoles', e.target.value);
     }
 
     const handleMoleIncreaseStrategy = (strategy: MoleIncreaseStrategies) => {
         setGameState(GameStates.READY);
         setMoleIncreaseStrategy(strategy);
+        localStorage.setItem('moleIncreaseStrategy', strategy);
     }
 
     const handleMoleIncreaseByTimeInterval = (e: any) => {
         setGameState(GameStates.READY);
         setMoleIncreaseByTimeInterval((Number(e.target.value)));
+        localStorage.setItem('moleIncreaseByTimeInterval', e.target.value);
     }
 
     const handleMoleIncreaseByScoreInterval = (e: any) => {
         setGameState(GameStates.READY);
         setMoleIncreaseByScoreInterval(Number(e.target.value));
+        localStorage.setItem('moleIncreaseByScoreInterval', e.target.value);
     }
 
     // MOLE ACCELERATION
     const handleAcceleration = (e: any) => {
         setGameState(GameStates.READY);
         setAvgMoleLifeTimeReducer(Number(e.target.value));
+        localStorage.setItem('avgMoleLifeTimeReducer', e.target.value);
     }
 
     const handleHasSpeedCap = (e: any) => {
         setGameState(GameStates.READY);
         setHasSpeedCap(e.target.checked);
+        localStorage.setItem('hasSpeedCap', e.target.checked);
     }
 
     const handleSpeedCap = (e: any) => {
         setGameState(GameStates.READY);
         setGameSpeedCap(Number(e.target.value));
+        localStorage.setItem('gameSpeedCap', e.target.value);
     }
+
+    // Read from local storage on start
+    useEffect(() => {
+        if (localStorage.getItem('moleRiseTime')) setMoleRiseTime(Number(localStorage.getItem('moleRiseTime')));
+        if (localStorage.getItem('moleUpTime')) setMoleUpTime(Number(localStorage.getItem('moleUpTime')));
+        if (localStorage.getItem('moleHideTime')) setMoleHideTime(Number(localStorage.getItem('moleHideTime')));
+        if (localStorage.getItem('nextMoleMinTime')) setNextMoleMinTime(Number(localStorage.getItem('nextMoleMinTime')));
+        if (localStorage.getItem('nextMoleMaxTime')) setNextMoleMaxTime(Number(localStorage.getItem('nextMoleMaxTime')));
+        if (localStorage.getItem('maxNumOfMoles')) setMaxNumOfMoles(Number(localStorage.getItem('maxNumOfMoles')));
+        if (localStorage.getItem('moleIncreaseStrategy')) setMoleIncreaseStrategy(localStorage.getItem('moleIncreaseStrategy') as MoleIncreaseStrategies);
+        if (localStorage.getItem('moleIncreaseByTimeInterval')) setMoleIncreaseByTimeInterval(Number(localStorage.getItem('moleIncreaseByTimeInterval')));
+        if (localStorage.getItem('moleIncreaseByScoreInterval')) setMoleIncreaseByScoreInterval(Number(localStorage.getItem('moleIncreaseByScoreInterval')));
+        if (localStorage.getItem('avgMoleLifeTimeReducer')) setAvgMoleLifeTimeReducer(Number(localStorage.getItem('avgMoleLifeTimeReducer')));
+        if (localStorage.getItem('hasSpeedCap')) setHasSpeedCap(Boolean(localStorage.getItem('hasSpeedCap')));
+        if (localStorage.getItem('gameSpeedCap')) setGameSpeedCap(Number(localStorage.getItem('gameSpeedCap')));
+        
+    }, []);
+    
 
     return (
         <div style={Container}>
+            <button onClick={resetEverything} style={ResetButton}>Resetoi kaikki</button>
 
             {/* MOLE BEHAVIOUR TIMINGS -------------------------------------- */}
             <section style={SectionContainer}>
@@ -129,7 +178,14 @@ export default function Page() {
                 <div style={InputContainer}>
                     <strong>Kauanko kestää nousta</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="riseSpeed" step={1} defaultValue={moleRiseTime} onChange={handleMoleRiseTime} />
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="riseSpeed"
+                            step={1}
+                            value={moleRiseTime}
+                            onChange={handleMoleRiseTime}
+                        />
                         <label htmlFor="riseSpeed">ms</label>
                     </div>
                 </div>
@@ -138,7 +194,14 @@ export default function Page() {
                 <div style={InputContainer}>
                     <strong>Kauanko pysyy ylhäällä</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="upTime" step={1} defaultValue={moleUpTime} onChange={handleMoleUpTime} />
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="upTime"
+                            step={1}
+                            value={moleUpTime}
+                            onChange={handleMoleUpTime}
+                        />
                         <label htmlFor="upTime">ms</label>
                     </div>
                 </div>
@@ -147,7 +210,14 @@ export default function Page() {
                 <div style={InputContainer}>
                     <strong>Kauankos kestää laskeutua</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input style={NumberStyle} type="number" name="removeSpeed" step={1} defaultValue={moleHideTime} onChange={handleMoleHideTime} />
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="removeSpeed"
+                            step={1}
+                            value={moleHideTime}
+                            onChange={handleMoleHideTime}
+                        />
                         <label htmlFor="removeSpeed">ms</label>
                     </div>
                 </div>
@@ -156,28 +226,28 @@ export default function Page() {
                 <div style={InputContainer}>
                     <strong>Kuinka nopeasti seuraava myyrä nousee</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input 
-                            style={NumberStyle} 
-                            type="number" 
+                        <input
+                            style={NumberStyle}
+                            type="number"
                             name="nextMoleSpeedMin"
-                            min={0} 
-                            max={nextMoleMaxTime-1}
-                            step={1} 
-                            defaultValue={nextMoleMinTime} 
-                            onChange={handleNextMoleMinTime} 
-                            />
+                            min={0}
+                            max={nextMoleMaxTime - 1}
+                            step={1}
+                            value={nextMoleMinTime}
+                            onChange={handleNextMoleMinTime}
+                        />
                         <label htmlFor="nextMoleSpeedMin">min ms</label>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <input 
-                            style={NumberStyle} 
-                            type="number" 
-                            name="nextMoleSpeedMax" 
+                        <input
+                            style={NumberStyle}
+                            type="number"
+                            name="nextMoleSpeedMax"
                             min={nextMoleMinTime}
-                            step={1} 
-                            defaultValue={nextMoleMaxTime} 
-                            onChange={handleNextMoleMaxTime} 
-                            />
+                            step={1}
+                            value={nextMoleMaxTime}
+                            onChange={handleNextMoleMaxTime}
+                        />
                         <label htmlFor="nextMoleSpeedMax">max ms</label>
                     </div>
                 </div>
@@ -191,7 +261,7 @@ export default function Page() {
 
                 <div style={InputContainer}>
                     <strong>Pelin nopeus nyt:</strong>
-                    <div style={{display: 'flex', gap: 5, alignItems: 'center'}}>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                         <strong style={{ fontSize: '1.1rem', borderRadius: '50px', alignSelf: 'flex-start', padding: '8px 16px', color: 'white', backgroundColor: '#ff0055ff' }}>
                             {gameSpeedMeter}
                         </strong>
@@ -375,4 +445,14 @@ const RadioStyle: React.CSSProperties = {
 const Disabled: React.CSSProperties = {
     opacity: 0.4,
     pointerEvents: 'none',
+}
+
+const ResetButton: React.CSSProperties = {
+    padding: "10px 20px",
+    backgroundColor: "#06114F",
+    color: "#FFFFFF",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "1.1rem",
+    fontWeight: "medium",
 }
