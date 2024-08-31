@@ -38,6 +38,7 @@ export default function PlayArea() {
   // Takes care of starting and ending the game
   useEffect(() => {
     if (gameState === GameStates.STARTED) {
+      setScoreNumber(0)
       newMole();
     }
 
@@ -47,7 +48,6 @@ export default function PlayArea() {
       setActiveMoles([])
       setCurrentNumOfMoles(1)
       setNextScoreMoleIncrease(moleIncreaseByScoreInterval)
-      setScoreNumber(0)
       setAvgMoleLifeTimeMultiplier(1)
     }
 
